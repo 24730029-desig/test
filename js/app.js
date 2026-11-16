@@ -25,7 +25,15 @@ const won=n=>n==null?'확인 필요':Number(n).toLocaleString()+'원';
 const lsGet=(k,f)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const S={q:'',f:{field:'',sub:'',elig:'',diff:''},sort:'deadline',menu:'',certs:[],status:'loading',dataSource:'J',tab:'home',my:'dday',delMode:false,delSel:[],modal:null,toast:'',failOnce:false,scroll:{}};
-const getT=()=>lsGet('targetExams',[]),getS=()=>lsGet('myCertStatus',{});
+// ── 저장소 계층: 모든 목표 D-Day / 취득 상태 읽기·쓰기는 여기만 거칩니다. ──
+const SYNC_KEYS=['targetExams','myCertStatus'];
+const syncHooks=[];                       // (key, value) => void : 클라우드 저장 함수가 여기에 등록됨
+const store={
+  get:(k,f)=>lsGet(k,f),
+  set(k,v){lsSet(k,v);if(SYNC_KEYS.includes(k))syncHooks.forEach(fn=>{try{fn(k,v)}catch(e){console.warn('sync hook 실패(로컬 저장은 유지)',e)}})}
+};
+const getT=()=>store.get('targetExams',[]),getS=()=>store.get('myCertStatus',{});
+const setT=v=>store.set('targetExams',v),setS=v=>store.set('myCertStatus',v);
 const tId=s=>+s.split(':')[0],tR=s=>s.split(':')[1];
 const byId=id=>S.certs.find(c=>c.id===id);
 const nextR=c=>c.rounds.filter(r=>dd(r.examDate)>=0).sort((a,b)=>a.examDate<b.examDate?-1:1)[0];
@@ -131,7 +139,8 @@ function renderList(){const el=$('#lb');
   el.innerHTML=h}
 
 function renderMy(){const T=getT().map(s=>({s,c:byId(tId(s))})).filter(x=>x.c).sort((a,b)=>dayOf(a.c)-dayOf(b.c));
-  let h=`<div class="tabs"><button class="${S.my==='dday'?'on':''}" data-act="mytab" data-v="dday">목표 D-Day</button><button class="${S.my==='status'?'on':''}" data-act="mytab" data-v="status">취득 상태</button></div>`;
+  let h=window.PassPickSync?window.PassPickSync.renderCardHTML():'';
+  h+=`<div class="tabs"><button class="${S.my==='dday'?'on':''}" data-act="mytab" data-v="dday">목표 D-Day</button><button class="${S.my==='status'?'on':''}" data-act="mytab" data-v="status">취득 상태</button></div>`;
   const none=empty('아직 등록된 목표 시험이 없습니다','관심 있는 자격증을 찾아 시험일을 등록해 보세요',`<button class="btn" data-act="nav" data-v="list">자격증 탐색하러 가기</button>`);
   if(S.my==='dday'){
     if(!T.length)h+=none;else{h+=`<div class="row sp"><span class="sub">등록 ${T.length}건</span><button class="sub" data-act="resetAll" style="text-decoration:underline;min-height:34px">전체 초기화</button></div>`;
@@ -151,14 +160,14 @@ function renderModal(){const m=S.modal,el=$('#modal');if(!m){el.innerHTML='';ret
   const sel=m.roundId||(reg?tR(reg):(rs[0]?.roundId)),r=rs.find(x=>x.roundId===sel)||rs[0];
   el.innerHTML=`<div class="ov" data-act="close"></div><div class="sheet" role="dialog" aria-label="${c.name} 상세"><div class="sb"><div class="sh"><span class="t cert-name" style="font-size:17px">${c.name}${sourceIcon(c)}</span><button class="chip" data-act="close">닫기 ✕</button></div>
   <div class="row sp" style="margin:8px 0"><span class="schedule-tag ${statusClass(c)}">${scheduleLabel(c)}</span>${r?`<span class="dd">${D(dd(r.examDate))}</span>`:""}</div><div class="sub">회차별 일정 (목표 회차 선택)</div>${rs.length?rs.map((x,i)=>`<label class="rr"><input type="radio" name="rd" value="${x.roundId}" ${x.roundId===r?.roundId?'checked':''} data-act="round"><span><b>${i+1}회차</b> 접수 ${x.applyStart} ~${x.applyEnd}<br>시험일 ${x.examDate} ·${D(dd(x.examDate))}</span></label>`).join(''):'<div class="box sub">등록된 시험 일정이 없습니다. 공식 시행기관에서 최신 일정을 확인해 주세요.</div>'}
-  ${c.overview?`<div class="sr" style="margin-top:8px"><b>소개</b><span>${c.overview}</span></div>`:''}<div class="sr" style="margin-top:6px"><b>응시 자격</b><span style="text-align:right">${c.eligibilityText}</span></div><div class="sr"><b>응시료</b><span>${won(c.fee)}${c.feeDetails?`<div class="sub">${Object.entries(c.feeDetails).map(([k,v])=>`${k} ${won(v)}`).join(" · ")}</div>`:""}${c.feeBasis?`<div class="sub">${c.feeBasis}</div>`:""}${c.feeSourceUrl?`<div class="sub">출처: <a href="${c.feeSourceUrl}" target="_blank" rel="noopener noreferrer">공식 응시료 안내 ↗</a></div>`:''}</span></div><div class="sr"><b>일정 확인</b><span>${c.researchStatus?.schedule|| (c.rounds?.length?'확인 완료':'미확인')}${c.scheduleSourceUrl?`<div class="sub"><a href="${c.scheduleSourceUrl}" target="_blank" rel="noopener noreferrer">공식 일정 안내 ↗</a></div>`:''}</span></div>${c.tags?.length?`<div class="sr"><b>태그</b><span>${c.tags.join(' · ')}</span></div>`:''}</div>
+  ${c.overview?`<div class="sr" style="margin-top:8px"><b>소개</b><span>${c.overview}</span></div>`:''}<div class="sr" style="margin-top:6px"><b>응시 자격</b><span>${c.eligibilityText}</span></div><div class="sr"><b>응시료</b><span>${won(c.fee)}${c.feeDetails?`<div class="sub">${Object.entries(c.feeDetails).map(([k,v])=>`${k} ${won(v)}`).join(" · ")}</div>`:""}${c.feeBasis?`<div class="sub">${c.feeBasis}</div>`:""}${c.feeSourceUrl?`<div class="sub">출처: <a href="${c.feeSourceUrl}" target="_blank" rel="noopener noreferrer">공식 응시료 안내 ↗</a></div>`:''}</span></div><div class="sr"><b>일정 확인</b><span>${c.researchStatus?.schedule|| (c.rounds?.length?'확인 완료':'미확인')}${c.scheduleSourceUrl?`<div class="sub"><a href="${c.scheduleSourceUrl}" target="_blank" rel="noopener noreferrer">공식 일정 안내 ↗</a></div>`:''}</span></div>${c.tags?.length?`<div class="sr"><b>태그</b><span>${c.tags.join(' · ')}</span></div>`:''}</div>
   <div class="bar">${S.toast?`<div class="toast"><span>${S.toast}</span><span>${r?D(dd(r.examDate)):dLabel(c)}</span></div>`:''}
   <a class="btn ln" href="${c.officialUrl}" target="_blank" rel="noopener noreferrer">공식 접수처 바로가기 ↗</a>
-  ${reg?`<div class="row"><div class="btn" style="flex:2">✓ 등록 완료</div><button class="btn ln" style="flex:1" data-act="unsave">취소</button></div>`:rs.length?`<button class="btn pr" data-act="save">목표 D-Day 등록</button>`:`<button class="btn pr" disabled title="시험 일정이 등록되지 않았습니다">일정 등록 후 목표 설정 가능</button>`}</div></div>`}
+  ${reg?`<button class="btn ln" data-act="unsave">✓ 등록 완료 · 눌러서 취소</button>`:rs.length?`<button class="btn pr" data-act="save">목표 D-Day 등록</button>`:`<button class="btn pr" disabled title="시험 일정이 등록되지 않았습니다">일정 등록 후 목표 설정 가능</button>`}</div></div>`}
 
 function refresh(){renderHome();renderMy()}
 function save(){const m=S.modal,c=byId(m.id),T=getT().filter(s=>tId(s)!==c.id),nr=nextR(c);if(!nr)return;const r=m.roundId||nr.roundId;
-  T.push(c.id+':'+r);lsSet('targetExams',T);const st=getS();if(!st[c.id]){st[c.id]='준비중';lsSet('myCertStatus',st)}}
+  T.push(c.id+':'+r);setT(T);const st=getS();if(!st[c.id]){st[c.id]='준비중';setS(st)}}
 let tt;function toast(t){S.toast=t;clearTimeout(tt);tt=setTimeout(()=>{S.toast='';renderModal()},2800)}
 
 function nav(v){const cur=document.querySelector('.view:not([hidden])');if(cur)S.scroll[S.tab]=cur.scrollTop;S.tab=v;
@@ -181,17 +190,21 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'open':S.modal={id:+d.id,roundId:null};S.toast='';renderModal();break;
   case'close':S.modal=null;S.toast='';renderModal();break;
   case'save':save();toast('목표 D-Day로 저장되었습니다');renderModal();refresh();break;
-  case'unsave':{const id=S.modal.id;lsSet('targetExams',getT().filter(s=>tId(s)!==id));toast('등록이 취소되었습니다');renderModal();refresh();break}
-  case'del':lsSet('targetExams',getT().filter(s=>tId(s)!==+d.id));renderMy();renderHome();break;
-  case'resetAll':if(confirm('등록된 목표 D-Day를 모두 삭제할까요?')){lsSet('targetExams',[]);refresh()}break;
+  case'syncCreate':window.PassPickSync?.createNewCode();break;
+  case'syncJoin':{const code=prompt('다른 기기에서 발급받은 6자리 연동 코드를 입력하세요:');if(code)window.PassPickSync?.connectWithCode(code);break}
+  case'syncPull':window.PassPickSync?.pull().then(ok=>{if(ok)alert('최신 클라우드 데이터를 불러왔습니다.')});break;
+  case'syncDisconnect':window.PassPickSync?.disconnect();break;
+  case'unsave':{const id=S.modal.id;setT(getT().filter(s=>tId(s)!==id));toast('등록이 취소되었습니다');renderModal();refresh();break}
+  case'del':setT(getT().filter(s=>tId(s)!==+d.id));renderMy();renderHome();break;
+  case'resetAll':if(confirm('등록된 목표 D-Day를 모두 삭제할까요?')){setT([]);refresh()}break;
   case'mytab':S.my=d.v;S.delMode=false;S.delSel=[];renderMy();break;
   case'delmode':S.delMode=true;S.delSel=[];renderMy();break;
   case'delcancel':S.delMode=false;S.delSel=[];renderMy();break;
-  case'delsel':{const n=S.delSel.length;if(n&&confirm('선택한 '+n+'개 자격증의 취득 상태를 삭제할까요?')){const st=getS();S.delSel.forEach(id=>delete st[id]);lsSet('myCertStatus',st);S.delMode=false;S.delSel=[];toast(n+'개의 취득 상태가 삭제되었습니다');renderMy()}break}
-  case'status':{const st=getS();st[d.id]=d.v;lsSet('myCertStatus',st);renderMy();break}
+  case'delsel':{const n=S.delSel.length;if(n&&confirm('선택한 '+n+'개 자격증의 취득 상태를 삭제할까요?')){const st=getS();S.delSel.forEach(id=>delete st[id]);setS(st);S.delMode=false;S.delSel=[];toast(n+'개의 취득 상태가 삭제되었습니다');renderMy()}break}
+  case'status':{const st=getS();st[d.id]=d.v;setS(st);renderMy();break}
   case'retry':load();break;
   case'demoErr':S.failOnce=true;load();break;
-  case'resetData':if(confirm('저장된 목표 D-Day와 취득 상태를 모두 지울까요?')){lsSet('targetExams',[]);lsSet('myCertStatus',{});refresh();renderModal()}break}});
+  case'resetData':if(confirm('저장된 목표 D-Day와 취득 상태를 모두 지울까요?')){setT([]);setS({});refresh();renderModal()}break}});
 
 document.addEventListener('change',e=>{const t=e.target;
   if(t.dataset&&t.dataset.act==='selall'){const ids=Object.keys(getS()).map(Number).filter(byId);S.delSel=t.checked?ids:[];renderMy();return}
@@ -208,5 +221,6 @@ async function loadPages(){
   $('#pages').innerHTML=parts.join('')}
 loadPages().then(()=>{
   $('#q').addEventListener('input',e=>{S.q=e.target.value;if(S.status==='ready')renderList()});
-  nav('home');load()
+  nav('home');load();
+  window.PassPickSync?.init()
 }).catch(()=>{$('#pages').innerHTML='<section class="view"><div class="box"><div class="t">화면 파일(pages/)을 불러오지 못했습니다</div><p class="sub" style="margin:8px 0">index.html을 더블클릭해서 열면 보안 때문에 pages/ 폴더를 읽을 수 없습니다. project 폴더에서 <b>python3 -m http.server 8000</b> 실행 후 <b>http://localhost:8000</b> 으로 열어 주세요. (GitHub Pages에서는 그대로 동작합니다.)</p></div></section>'});

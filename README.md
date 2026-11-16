@@ -2,7 +2,7 @@
 
 대학생 맞춤형 자격증 시험 조건 탐색 및 D-Day 관리 서비스
 
-> **문서 버전:** PRD v0.4 (10주차)
+> **문서 버전:** PRD v0.5
 > **형태:** 웹 기반 모바일 퍼스트(402pt, iPhone 17 기준) 자격증 탐색 및 개인화 일정 관리 서비스
 
 ---
@@ -13,7 +13,8 @@
 
 | 버전 | 내용 |
 | :--- | :--- |
-| **v0.5** (예정) | Firebase Firestore 연동 및 기기 간 클라우드 동기화(로컬 Fallback 포함) |
+| **v0.6** (예정) | Firebase 클라우드 동기화 구현: 익명 로그인 + 연동 코드로 목표 D-Day·취득 상태를 Firestore에 저장·불러오기, 오프라인 시 `localStorage` Fallback, 동기화 상태 표시 |
+| **v0.5** (Firebase 준비·저장 구조 정리) | ① Firebase 프로젝트 설정: 웹 앱 등록(`js/firebase-config.js`), 익명 로그인 사용 설정, Firestore 생성 및 보안 규칙 적용(`sync/{코드}` 경로만 허용) ② 목표 D-Day·취득 상태의 읽기·쓰기를 `store` 계층 한곳으로 정리해 동기화를 한 줄로 덧붙일 수 있게 구조화(동작은 기존과 동일) ③ 클라우드 동기화 설계 확정: 개인정보 없이 앱이 만든 랜덤 연동 코드 방식 ④ GitHub 저장소 업로드 및 GitHub Pages 배포 ⑤ README를 실제 코드(필드명·폴더 구조)에 맞게 정정 |
 | **v0.4** (10주차 UI/UX 개선) | ① 마이 페이지 `목표 D-Day` / `취득 상태` 2탭 개편, 등록 건수·삭제·전체 초기화 정돈, `준비중`/`합격` 취득 상태 관리 신설 ② 검색 정렬에 `인기순` 추가, 소분류 메타 태그 확장, 목록 카드에 `정기/상시` 배지 노출 ③ 상세 모달 `닫기 X` 태그 버튼, 회차별 `정기`·`D-4` 배지, 부가 정보 구분선 정리, 하단 CTA 스티키 고정 ④ iPhone 17(402pt) 기준 화면, 하단 탭 고정·내용 영역 스크롤 ⑤ 홈 목표 D-Day 히어로 카드(0건·1건·2~3건) ⑥ 검색 필터 개편(분야 → 세부 분야 구분)과 인기순 순위 숫자 ⑦ 마이 취득 상태 체크박스 선택 삭제 ⑧ 화면별 HTML(`pages/`) 분리 및 폴더 구조 정리 |
 | **v0.3** (데이터 및 상세 모달 강화) | ① 샘플 7건에서 **300건 규모 데이터셋**으로 확충 ② 응시 자격 분류를 `제한없음 / 학년 / 전공`에서 **`제한없음 / 응시 자격 확인 필요`** 로 간소화 ③ 분야·난이도·응시료 등 데이터 플래그를 추가하고 와이어프레임 UI 배지와 연동 ④ 상세 모달 일정에 **연도(YYYY-MM-DD)** 명시 ⑤ 자격증 '소개'(직무 역량·취득 이점)와 세부 응시 자격 안내 문구 확장 ⑥ 응시료 출처 링크, 공식 일정 확인 링크, 키워드 '태그' 항목 신설 |
 | **v0.2** (필수 트랙 구현) | 검색·다중 필터·정렬, 상세 모달, `localStorage` 기반 목표 D-Day·취득 상태 저장 |
@@ -26,7 +27,7 @@
 1. [프로젝트 개요](#1-프로젝트-개요)
 2. [화면별 요구사항](#2-화면별-요구사항)
 3. [데이터 설계 및 구조](#3-데이터-설계-및-구조)
-4. [향후 계획: 클라우드 동기화](#4-향후-계획-클라우드-동기화-미구현)
+4. [향후 계획: 클라우드 동기화](#4-향후-계획-클라우드-동기화-v06-예정)
 5. [실행 방법](#5-실행-방법)
 
 ---
@@ -114,7 +115,8 @@
 │   ├── certificates.json   # 300건 자격증 데이터셋 (앱이 먼저 읽음)
 │   └── certificates.js     # 같은 데이터 (json을 읽지 못할 때 대체)
 ├── js/
-│   └── app.js              # 검색/필터/정렬, D-Day 계산, 상태 관리, pages 불러오기
+│   ├── app.js              # 검색/필터/정렬, D-Day 계산, 상태 관리(store 계층), pages 불러오기
+│   └── firebase-config.js  # Firebase 웹 앱 설정값 (v0.6에서 index.html에 연결 예정)
 ├── pages/
 │   ├── home.html           # 홈 화면 (#v-home)
 │   ├── search.html         # 검색 화면 (#v-list)
@@ -150,27 +152,59 @@
 
 | 키 | 내용 |
 | :--- | :--- |
-| `targetExams` | 목표 D-Day로 등록한 자격증 |
-| `myCertStatus` | 자격증별 `준비중` / `합격` 상태 |
+| `targetExams` | 목표 D-Day로 등록한 자격증 (`"자격증id:회차id"` 문자열 배열) |
+| `myCertStatus` | 자격증별 `준비중` / `합격` 상태 (`{자격증id: 상태}`) |
 
-현재는 브라우저 `localStorage`에 저장됩니다.
+현재는 브라우저 `localStorage`에 저장됩니다. 읽기·쓰기는 모두 `js/app.js`의 `store` 계층(`getT`/`getS`/`setT`/`setS`)을 거치며, 저장할 때마다 `syncHooks`에 등록된 함수가 호출되는 구조입니다. v0.6에서 이 자리에 클라우드 저장 함수를 등록합니다. 훅이 실패해도 로컬 저장과 화면에는 영향이 없습니다.
 
 ---
 
-## 4. 향후 계획: 클라우드 동기화 (미구현)
+## 4. 향후 계획: 클라우드 동기화 (v0.6 예정)
 
-> v0.4 시점에는 구현되어 있지 않으며, 이후 버전에서 진행할 계획입니다.
+> 아직 앱에 연결되어 있지 않습니다. v0.5에서 준비를 마쳤고, v0.6에서 구현합니다.
 
-**배경:** `localStorage`에만 저장하면 브라우저 데이터 삭제 시 기록이 유실되고 PC·모바일 간 연동이 불가능합니다.
+**배경:** `localStorage`에만 저장하면 브라우저 데이터를 지웠을 때 기록이 사라지고, PC·모바일 간에 일정을 이어 볼 수 없습니다.
 
-**설계안: Firebase Firestore + 로컬 Fallback**
+### 4.1 v0.5에서 준비한 것
 
-1. **Local-First 렌더링:** 실행 시 `localStorage` 캐시를 즉시 읽어 지연 없이 화면 표시
-2. **백그라운드 동기화:** Firestore(`users/{syncKey}`)에서 최신 데이터를 비동기 조회해 갱신
-3. **Graceful Fallback:** 오프라인·지연·DB 오류 시에도 경고 로그만 남기고 `localStorage` 모드로 정상 동작
-4. **동기화 코드:** 회원가입 없이 학번·닉네임 등 사용자 지정 코드로 기기 간 동기화
+- Firebase 웹 앱 등록, 설정값 `js/firebase-config.js` (`firebaseConfig`는 공개돼도 되는 식별 정보이며, 접근 제어는 보안 규칙이 담당)
+- Authentication **익명 로그인** 사용 설정 (가입·이메일·비밀번호 없음)
+- Firestore 생성(프로덕션 모드) 및 보안 규칙 게시
+- 앱의 저장 구조 정리(`store` / `syncHooks`)
 
-**보안·배포 고려:** `firebaseConfig`는 프론트엔드에 노출되므로 Firestore Security Rules로 `users/{userId}` 경로만 접근하도록 제한합니다. 구현 시 `index.html`에 Firebase SDK 스크립트를 추가해야 합니다.
+### 4.2 설계: 익명 로그인 + 연동 코드 + Local-First
+
+- **개인정보를 받지 않습니다.** 학번·이름 대신, 앱이 만든 랜덤 **연동 코드**(예: `K7M2-QX9P`)로 데이터를 구분합니다. 저장하는 값은 `targetExams`, `myCertStatus`, `updatedAt`뿐입니다.
+- **연동 코드가 필요한 이유:** 익명 계정의 ID는 브라우저 안에 저장되어, 캐시를 지우면 함께 사라집니다. 사용자가 연동 코드를 따로 보관해야 데이터 복구와 기기 간 동기화가 가능합니다.
+- **저장 위치:** Firestore `sync/{연동 코드}` 문서 1개
+
+**동작 흐름**
+
+1. **Local-First:** 화면은 항상 `localStorage`를 기준으로 즉시 그립니다.
+2. **백그라운드 저장:** 저장할 때마다 `syncHooks`를 통해 Firestore에 비동기로 올립니다.
+3. **연동:** 다른 기기에서 연동 코드를 입력하면 클라우드 데이터를 불러옵니다. 기기와 클라우드 데이터가 모두 있으면 덮어쓰지 않고 **합칩니다**(목표는 합집합, 상태는 `합격` 우선).
+4. **Graceful Fallback:** 오프라인·지연·DB 오류가 나도 앱은 멈추지 않고 `localStorage`로 정상 동작하며, 마이 화면에 동기화 상태(`동기화됨` / `오프라인: 이 기기에만 저장 중`)를 표시합니다.
+
+### 4.3 보안 규칙 (적용 완료)
+
+```text
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /sync/{code} {
+      allow get: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.resource.data.keys().hasOnly(['targetExams','myCertStatus','updatedAt'])
+        && request.resource.data.targetExams is list
+        && request.resource.data.targetExams.size() <= 50
+        && request.resource.data.myCertStatus is map;
+      allow list, delete: if false;
+    }
+  }
+}
+```
+
+로그인(익명 포함)한 사용자만 `sync/{코드}` 문서를 읽고 쓸 수 있습니다. 문서 목록 조회와 삭제는 막아서 연동 코드를 모르면 다른 사람의 데이터를 찾을 수 없고, 저장 가능한 항목과 크기도 제한합니다.
 
 ---
 

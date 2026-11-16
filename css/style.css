@@ -478,3 +478,36 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline-color:var(--dee
 
 /* D-Day: 'D-'와 숫자 크기·높이 통일 (옛스타일 숫자 → 라이닝 숫자) */
 .dd,.hero .dd,.d3 .dd,.box .dd,.card .dd{font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1}
+
+/* ---- 폰트 단일화: Pretendard 하나만 사용 ---- */
+:root{--serif:inherit;--script:inherit}
+body,button,input,.dd,.hero .dd,.d3 .dd,.box .dd,.card .dd,.brand,.rk,.t{font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+
+/* ---- 색 정리: 진한 틸(주색) + 민트(보조)로 대비 확보 ---- */
+:root{--deep:#2E6E5F;--accent:#2E6E5F;--accent-d:#2E6E5F;--dk:#2E6E5F;--on:#FFFFFF;--accent-l:#B7DCD3;--muted:#5E7A73}
+.brand .b2{color:#75AFA0}
+.nav button.on svg{stroke:#2E6E5F}
+.chip:active,.chip.on,.ftab.set,.panel .chip.on,.card .dd,.rk{background:#2E6E5F;border-color:#2E6E5F;color:#fff}
+.btn.pr{background:#2E6E5F;color:#fff;box-shadow:0 6px 16px rgba(46,110,95,.3)}
+.box.hero{background:#2E6E5F;color:#fff;box-shadow:0 14px 30px rgba(46,110,95,.35)}
+.box.hero::before{background:radial-gradient(circle at 35% 35%,#E8F5F1,#B7DCD3 50%,#75AFA0)}
+.hero .t,.hero .dd{color:#fff}
+.hero-ap,.hero-ap.closed,.hero-ap.open,.hero-ap.soon{background:rgba(255,255,255,.2);color:#fff;backdrop-filter:none}
+.hero-bar{background:rgba(255,255,255,.22)}
+.hero-bar i{background:#B7DCD3}
+.hero-info>div{background:rgba(255,255,255,.12);color:#fff}
+.hero-info b,.hero .meta,.hero .sub{color:rgba(255,255,255,.75)}
+.hero-empty .dd{color:rgba(255,255,255,.3)}
+.hero-empty .btn.pr{background:#F7FAFC;color:#2E6E5F;box-shadow:none}
+.schedule-tag.status-open{background:#D3EAE3;color:#245648}
+.d3 .dd,.box .dd{color:#2E6E5F}
+.hero .dd{color:#fff}
+
+/* 상세 모달: 소개·응시 자격 등 값 텍스트를 왼쪽 정렬 */
+.sr{justify-content:flex-start;text-align:left}
+.sr>span{flex:1;text-align:left}
+
+/* 상세 모달 값 텍스트 전부 왼쪽 정렬 (줄바꿈 포함) */
+.sr,.sr *{text-align:left}
+.sr>span{flex:1;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.bar .btn.ln[data-act="unsave"]{background:var(--fd);border-color:var(--deep);color:var(--dk);font-weight:700}
