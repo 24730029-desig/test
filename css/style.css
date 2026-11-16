@@ -425,3 +425,56 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline-color:var(--dee
 /* 로고: 고딕(Pretendard) 굵게, Pick만 포인트 컬러 */
 .brand{font-family:inherit;font-weight:800;font-size:26px;letter-spacing:-.04em}
 .brand .b2{font-family:inherit;font-weight:800;font-size:26px;margin-left:0;letter-spacing:-.04em;color:#6B8F78}
+
+/* =====================================================================
+   Mint Teal 팔레트 — #F7FAFC(배경) · #75AFA0(포인트) · #B7DCD3(연한 포인트) · #E8F5F1(연한 면)
+   --dk 는 흰 배경 위 글자용 진한 톤, --on 은 포인트 색 위 글자용
+   ===================================================================== */
+:root{
+  --bg:#F7FAFC;--paper:#F7FAFC;--card:#FFFFFF;--deep:#75AFA0;--accent:#75AFA0;--accent-d:#3F7D6E;--accent-l:#B7DCD3;
+  --desk:#E8F5F1;--fill:#E8F5F1;--fd:#D3EAE3;--line:#DCEAE6;--ls:#C9DFD8;--ink:#1B2B27;--muted:#62807A;--mark:#75AFA0;
+  --dk:#3F7D6E;--on:#0F2E27;
+}
+.app{box-shadow:0 10px 40px rgba(63,125,110,.14)}
+.brand .b2{color:#75AFA0}
+.nav{box-shadow:0 8px 24px rgba(63,125,110,.14)}
+.nav button.on{color:var(--dk)}.nav button.on svg{stroke:var(--dk)}
+.sec>.row .sub{color:var(--dk);border-bottom:1px solid var(--accent-l)}
+.inp{box-shadow:0 4px 14px rgba(63,125,110,.08)}
+.inp:focus{border-color:var(--deep)}
+.chip:active,.chip.on,.ftab.set,.panel .chip.on{background:var(--deep);border-color:var(--deep);color:var(--on)}
+.ftab{box-shadow:0 3px 10px rgba(63,125,110,.07)}
+.ftab.open{border-color:var(--deep);box-shadow:0 0 0 1px var(--deep)}
+.panel{background:#E8F5F1}
+.sorts button.on{color:var(--dk);border-bottom:1.5px solid var(--deep)}
+.card,.box{box-shadow:0 8px 22px rgba(63,125,110,.09)}
+.card .dd,.rk{background:var(--deep);color:var(--on)}
+.schedule-tag.status-open{background:#D3EAE3;color:#2F6B5C}
+.schedule-tag.status-regular{background:#E8F5F1;color:#2F6B5C}
+.source-icon,.source-badge{background:#E8F5F1;border-color:#B7DCD3;color:#2F6B5C}
+.d3 .dd,.box .dd{color:var(--dk)}
+.empty{background:rgba(232,245,241,.7)}
+.btn.pr{background:var(--deep);color:var(--on);box-shadow:0 6px 16px rgba(117,175,160,.4)}
+.add-goal{color:var(--dk);background:rgba(232,245,241,.7)}
+.add-goal:active{border-color:var(--deep);color:var(--dk)}
+.ck,input[type=radio]{accent-color:var(--deep)}
+.tabs .on{color:var(--dk);box-shadow:inset 0 -2px 0 var(--deep)}
+.box.hero{background:var(--deep);color:var(--on);box-shadow:0 14px 30px rgba(117,175,160,.45)}
+.box.hero::before{background:radial-gradient(circle at 35% 35%,#E8F5F1,#B7DCD3 55%,#9CCBBE)}
+.hero .t,.hero .dd{color:var(--on)}
+.hero-ap,.hero-ap.closed,.hero-ap.open,.hero-ap.soon{background:rgba(247,250,252,.45);color:var(--on);backdrop-filter:blur(2px)}
+.hero-bar{background:rgba(247,250,252,.45)}
+.hero-bar i{background:var(--on)}
+.hero-info>div{background:rgba(247,250,252,.35);color:var(--on)}
+.hero-info b,.hero .meta,.hero .sub{color:rgba(15,46,39,.72)}
+.hero-empty .dd{color:rgba(15,46,39,.25)}
+.hero-empty .btn.pr{background:#F7FAFC;color:var(--dk);box-shadow:none}
+.ov{background:rgba(15,46,39,.45)}
+.bar{background:#E8F5F1}
+.toast{border-color:var(--deep);color:var(--dk)}
+.sheet a:not(.btn),.sr a{color:var(--dk);text-decoration-color:var(--accent-l)}
+.delbar{background:linear-gradient(rgba(247,250,252,0),#F7FAFC 30%)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline-color:var(--deep)}
+
+/* D-Day: 'D-'와 숫자 크기·높이 통일 (옛스타일 숫자 → 라이닝 숫자) */
+.dd,.hero .dd,.d3 .dd,.box .dd,.card .dd{font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1}
