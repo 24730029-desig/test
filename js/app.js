@@ -100,10 +100,10 @@ function renderHome(){
   // 3 & 4. 임박 시험 및 인기 자격증 리스트
   if(S.status==='ready'&&S.certs.length){
     const urgent=S.certs.slice().sort((a,b)=>dayOf(a)-dayOf(b)).slice(0,4);
-    h+=`<div class="sec"><div class="row sp"><div class="t" style="font-size:14px">🔥 원서 접수 임박 시험</div><button class="sub" data-act="quick" data-v="" style="text-decoration:underline">전체보기</button></div><div class="sec-list" style="margin-top:8px">${urgent.map(c=>cardH(c)).join('')}</div></div>`;
+    h+=`<div class="sec"><div class="row sp"><div class="t">원서 접수 임박 시험</div><button class="sub" data-act="quick" data-v="" style="text-decoration:underline">전체보기</button></div><div class="sec-list" style="margin-top:8px">${urgent.map(c=>cardH(c)).join('')}</div></div>`;
 
     const popular=S.certs.slice().sort((a,b)=>popRank(a)-popRank(b)).slice(0,5);
-    h+=`<div class="sec"><div class="t" style="font-size:14px">🏆 대학생 인기 자격증 Top 5</div><div class="sec-list" style="margin-top:8px">${popular.map((c,i)=>cardH(c,i+1)).join('')}</div></div>`;
+    h+=`<div class="sec"><div class="t">대학생 인기 자격증 Top 5</div><div class="sec-list" style="margin-top:8px">${popular.map((c,i)=>cardH(c,i+1)).join('')}</div></div>`;
   }
 
   $('#v-home').innerHTML=h
