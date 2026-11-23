@@ -1,8 +1,5 @@
-<!-- 검색/목록 화면: 필터·결과 목록은 js/app.js 의 renderList()가 #lb 에 채웁니다 -->
+<!-- 검색 화면: 검색창은 여기, 필터·결과 목록은 js/app.js 의 renderList()가 #lb 에 채웁니다 -->
 <section class="view" id="v-list" hidden>
-  <div class="sh-top">
-    <label class="sh-inp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg><input id="q" type="search" placeholder="자격증을 검색해보세요!" autocomplete="off" aria-label="자격증 검색"></label>
-    <button class="sh-cancel" data-act="cancel">취소</button>
-  </div>
+  <input class="inp" id="q" type="search" placeholder="자격증명 · 키워드 검색" autocomplete="off" aria-label="자격증 검색">
   <div id="lb"></div>
 </section>
