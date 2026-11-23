@@ -78,7 +78,7 @@ const cardH=(c,r)=>`<button class="card" data-act="open" data-id="${c.id}"><div 
 const badgesH=(c,fee)=>`<div class="meta">${c.field} › ${c.sub} · ${c.eligibility} · 난이도 ${dots(c.difficulty)}${fee||S.sort==='fee'?' · '+won(c.fee):''}</div>`;
 const empty=(t,s,btn)=>`<div class="empty"><p><b>${t}</b>${s}</p>${btn}</div>`;
 
-function heroH(s,c){
+function heroH(s,c,multi){
   const r=c.rounds.find(x=>x.roundId===tR(s))||nextR(c);
   if(!r)return `<button class="box hero" data-act="open" data-id="${c.id}"><div class="hero-top"><span class="sub">${c.name}</span></div><div class="dd">${dLabel(c)}</div></button>`;
   const a0=dd(r.applyStart),a1=dd(r.applyEnd),n=dd(r.examDate);
@@ -90,32 +90,29 @@ function heroH(s,c){
     <div class="hero-bar"><i style="width:${pct}%"></i></div>
     <div class="hero-info"><div><b>시험일</b>${r.examDate}</div><div><b>접수 기간</b>${md(r.applyStart)} ~ ${md(r.applyEnd)}</div></div>
     ${badgesH(c,true)}
-  </button><button class="add-goal" data-act="nav" data-v="list">＋ 비교할 목표 시험 더 추가하기</button>`}
+  </button>${multi?'':`<button class="add-goal" data-act="nav" data-v="list">＋ 비교할 목표 시험 더 추가하기</button>`}`}
+
+const GLYPH=[[/IT|컴퓨터/,'<rect x="12" y="16" width="36" height="25" rx="3"/><path d="M7 46h46M22 24l-4 4 4 4M38 24l4 4-4 4"/>'],[/어학/,'<path d="M10 14h40a3 3 0 0 1 3 3v20a3 3 0 0 1-3 3H29l-10 8v-8h-9a3 3 0 0 1-3-3V17a3 3 0 0 1 3-3z"/><path d="M20 27h.1M30 27h.1M40 27h.1"/>'],[/전문/,'<rect x="8" y="20" width="44" height="28" rx="4"/><path d="M22 20v-5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v5M8 34h44"/>'],[/공기업/,'<path d="M8 24L30 10l22 14M12 24v22M24 24v22M36 24v22M48 24v22M8 50h44"/>'],[/사무/,'<rect x="10" y="10" width="40" height="40" rx="4"/><path d="M10 22h40M10 34h40M24 10v40"/>']];
+const glyphOf=f=>(GLYPH.find(g=>g[0].test(f))||[0,'<path d="M30 12L6 24l24 12 24-12zM16 30v12c0 4 28 4 28 0V30"/>'])[1];
+const thumbH=c=>`<span class="th th${FIELDS.indexOf(c.field)%3}"><svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${glyphOf(c.field)}</svg></span>`;
+const IC={bm:'<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.2-6.5 8-6.5s7 2 8 6.5"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/>',filter:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',bar:'<path d="M6 20v-6M12 20V8M18 20v-9"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>'};
+const ic=(k,w=22)=>`<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+const HERO_SVG=`<svg class="hv-art" viewBox="0 0 220 190" aria-hidden="true"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D5F0E7"/><stop offset="1" stop-color="#B4E2D2"/></linearGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B9A4F5"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs><ellipse cx="100" cy="150" rx="96" ry="60" fill="url(#g1)" opacity=".6"/><circle cx="206" cy="70" r="46" fill="#DDD6FE" opacity=".55"/><g transform="rotate(-8 105 100)"><rect x="40" y="38" width="128" height="94" rx="16" fill="#fff" stroke="#E6EEEA" stroke-width="2"/><rect x="58" y="58" width="70" height="9" rx="4.5" fill="#E4E0F7"/><rect x="58" y="76" width="52" height="9" rx="4.5" fill="#E4E0F7"/><rect x="58" y="94" width="36" height="9" rx="4.5" fill="#E4E0F7"/><path d="M142 118l-9 28 13-7 11 9 2-27z" fill="url(#g2)"/><circle cx="148" cy="108" r="24" fill="url(#g2)"/><circle cx="148" cy="108" r="15" fill="#EDE9FE"/><path d="M148 98l3.3 7.2 7.8.9-5.8 5.3 1.6 7.7-6.9-4-6.9 4 1.6-7.7-5.8-5.3 7.8-.9z" fill="#8B5CF6"/></g><path d="M52 24l8 12M66 16l4 14M80 22l-2 12" stroke="#A78BFA" stroke-width="4" stroke-linecap="round" opacity=".8"/></svg>`;
 
 function renderHome(){
-  const TP=getT().map(s=>({s,c:byId(tId(s))})).filter(x=>x.c).sort((a,b)=>dayOf(a.c)-dayOf(b.c)).slice(0,3),T=TP.map(x=>x.c);
-  let h='';
-  
-  // 1. 내 목표 D-Day
-  h+=`<div class="sec" style="margin-top:0">`;
+  let h=`<div class="hv"><div class="hv-top"><div class="hv-logo">Get<span>Pass</span><svg class="hv-spark" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M13 4l2 4M18 2l.5 4.5M21 8l-4 1.5"/></svg></div><div class="hv-ic"><button data-act="nav" data-v="my" data-my="dday" aria-label="저장한 목록">${ic('bm',24)}</button><button data-act="nav" data-v="my" data-my="status" aria-label="마이페이지">${ic('user',24)}</button></div></div>
+  <div class="hv-hero"><div class="hv-copy"><h1>나에게 맞는<br><em>자격증</em>을 찾아보세요</h1><p>GetPass와 함께,<br>더 가까워지는 취업 준비 ✨</p></div>${HERO_SVG}</div>
+  <button class="hv-search" data-act="nav" data-v="list" data-focus="1"><span class="hv-si">${ic('search',22)}</span><span class="hv-ph">자격증 이름을 검색하세요</span></button>`;
   if(S.status==='error')h+=`<div class="box sub">자격증 정보를 불러오지 못했습니다. 저장한 목표는 유지됩니다.</div>`;
   else if(S.status==='loading')h+=`<div class="skel"></div>`;
-  else if(!T.length)h+=`<div class="box hero hero-empty"><div class="hero-top"><span class="t">나의 목표 D-Day</span><span class="hero-ap">미등록</span></div><div class="dd">D-?</div><div class="hero-bar"><i style="width:0"></i></div><p class="sub" style="margin:12px 0 14px;line-height:1.5">시험일을 등록하면 D-Day와 접수 일정이<br>여기에 한눈에 보여요</p><button class="btn pr" data-act="nav" data-v="list">D-Day 등록하기</button></div>`;
-  else if(T.length===1)h+=heroH(TP[0].s,TP[0].c);
-  else h+=`<div class="d3">`+T.map(c=>`<button class="box" data-act="open" data-id="${c.id}"><div class="sub">${c.name}</div><div class="dd">${dLabel(c)}</div></button>`).join('')+`</div>`;
-  h+=`</div>`;
-
-  // 3 & 4. 임박 시험 및 인기 자격증 리스트
-  if(S.status==='ready'&&S.certs.length){
-    const urgent=S.certs.slice().sort((a,b)=>dayOf(a)-dayOf(b)).slice(0,4);
-    h+=`<div class="sec"><div class="row sp"><div class="t">원서 접수 임박 시험</div><button class="sub" data-act="quick" data-v="" style="text-decoration:underline">전체보기</button></div><div class="sec-list" style="margin-top:8px">${urgent.map(c=>cardH(c)).join('')}</div></div>`;
-
-    const popular=S.certs.slice().sort((a,b)=>popRank(a)-popRank(b)).slice(0,5);
-    h+=`<div class="sec"><div class="t">대학생 인기 자격증 Top 5</div><div class="sec-list" style="margin-top:8px">${popular.map((c,i)=>cardH(c,i+1)).join('')}</div></div>`;
-  }
-
-  $('#v-home').innerHTML=h
-}
+  else{
+    const fs=['',...FIELDS.filter(f=>f!=='기타'),'기타'];if(S.hf==null||!fs.includes(S.hf))S.hf='';
+    const list=S.certs.filter(c=>!S.hf||c.field===S.hf).sort((a,b)=>(!nextR(a)-!nextR(b))||popRank(a)-popRank(b)).slice(0,4),reg=new Set(getT().map(tId));
+    h+=`<div class="hv-chips">${fs.map(f=>`<button class="hv-chip${S.hf===f?' on':''}" data-act="hfield" data-v="${f}">${f?f.replace('/',' · '):'전체'}</button>`).join('')}</div>
+    <div class="hv-sh"><h2>추천 자격증</h2><button data-act="quick" data-v="${S.hf}">더보기 ${ic('arrow',16)}</button></div>
+    <div class="hv-list">${list.map(c=>{const on=reg.has(c.id),dl=dDayLabel(c);return `<div class="hv-card" data-act="open" data-id="${c.id}" role="button" tabindex="0">${thumbH(c)}<div class="hv-body"><span class="hv-tag">${c.sub||c.field}</span><div class="hv-name">${c.name}</div><div class="hv-desc">${(c.tags||[]).slice(3,5).join(' · ')||c.eligibility}</div><div class="hv-pills"><span>${ic('bar',15)}난이도 ${c.difficulty}</span><span>${ic('cal',15)}${dl||scheduleLabel(c)}</span></div></div><button class="hv-bm${on?' on':''}" data-act="bm" data-id="${c.id}" aria-label="${c.name} 목표 ${on?'해제':'등록'}"><svg width="24" height="24" viewBox="0 0 24 24" fill="${on?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linejoin="round">${IC.bm}</svg></button></div>`}).join('')}</div>`}
+  h+=`</div><div class="hv-cta"><button class="btn pr" data-act="nav" data-v="list">자격증 찾기 ${ic('arrow',20)}</button></div>`;
+  $('#v-home').innerHTML=h}
 
 function menuH(k,label,opts,fmt){const cur=S.f[k];
   return `<button class="chip${cur?' on':''}" data-act="menu" data-k="${k}" aria-expanded="${S.menu===k}">${label}${cur?': '+fmt(cur):''} ▾</button>`}
@@ -144,14 +141,15 @@ function renderMy(){const T=getT().map(s=>({s,c:byId(tId(s))})).filter(x=>x.c).s
   const none=empty('아직 등록된 목표 시험이 없습니다','관심 있는 자격증을 찾아 시험일을 등록해 보세요',`<button class="btn" data-act="nav" data-v="list">자격증 탐색하러 가기</button>`);
   if(S.my==='dday'){
     if(!T.length)h+=none;else{h+=`<div class="row sp"><span class="sub">등록 ${T.length}건</span><button class="sub" data-act="resetAll" style="text-decoration:underline;min-height:34px">전체 초기화</button></div>`;
-      h+=T.map(({s,c})=>{const r=c.rounds.find(r=>r.roundId===tR(s));return `<div class="row sp" style="border-bottom:1px dashed var(--line)"><button class="card" style="border:0;flex:1" data-act="open" data-id="${c.id}"><div class="t">${c.name}</div><div class="sub">시험일 ${r?r.examDate:'-'}</div></button><span class="dd">${r?D(dd(r.examDate)):dLabel(c)}</span><button class="chip" data-act="del" data-id="${c.id}" aria-label="${c.name} 삭제">삭제</button></div>`}).join('')}
+      h+=T.map(({s,c})=>{const r=c.rounds.find(r=>r.roundId===tR(s));return `<div class="row sp my-row"><button class="my-name" data-act="open" data-id="${c.id}"><div class="t">${c.name}</div><div class="sub">시험일 ${r?r.examDate:'-'}</div></button><span class="my-dd${r?'':' sm'}">${r?D(dd(r.examDate)):dLabel(c)}</span><button class="xbtn" data-act="del" data-id="${c.id}" aria-label="${c.name} 삭제">×</button></div>`}).join('')}
   }else{const st=getS(),ids=Object.keys(st).map(Number).filter(byId),dm=S.delMode&&ids.length>0,sel=S.delSel.filter(id=>ids.includes(id));
     if(!ids.length)h+=none;else{
       h+=dm?`<div class="row sp" style="margin:2px 0 4px"><label class="row" style="gap:8px;min-height:36px;cursor:pointer"><input type="checkbox" class="ck" data-act="selall" ${sel.length===ids.length?'checked':''}><span class="t" style="font-size:14px">전체 선택</span></label><button class="sub" data-act="delcancel" style="text-decoration:underline;min-height:34px">취소</button></div>`
         :`<div class="row sp" style="margin:2px 0 4px"><span class="sub">총 ${ids.length}건</span><button class="sub" data-act="delmode" style="text-decoration:underline;min-height:34px">삭제</button></div>`;
-      h+=ids.map(id=>{const c=byId(id);return dm
-        ?`<label class="row" style="gap:10px;padding:12px 0;border-bottom:1px dashed var(--line);cursor:pointer"><input type="checkbox" class="ck" data-act="selone" data-id="${id}" ${sel.includes(id)?'checked':''}><span class="t" style="flex:1;min-width:0">${c.name}</span><span class="sub">${st[id]}</span></label>`
-        :`<div class="row sp" style="padding:11px 0;border-bottom:1px dashed var(--line)"><span class="t" style="flex:1;min-width:0">${c.name}</span><div class="chips" style="flex:0 0 auto;flex-wrap:nowrap">${['준비중','합격'].map(v=>`<button class="chip${st[id]===v?' on':''}" data-act="status" data-id="${id}" data-v="${v}">${v}</button>`).join('')}</div></div>`}).join('');
+      const row=id=>{const c=byId(id);return dm
+        ?`<label class="row" style="gap:10px;padding:12px 0;border-bottom:1px dashed var(--line);cursor:pointer"><input type="checkbox" class="ck" data-act="selone" data-id="${id}" ${sel.includes(id)?'checked':''}><span class="t" style="flex:1;min-width:0">${c.name}</span></label>`
+        :`<div class="row sp" style="padding:11px 0;border-bottom:1px dashed var(--line)"><span class="t" style="flex:1;min-width:0">${c.name}</span><div class="chips" style="flex:0 0 auto;flex-wrap:nowrap">${['준비중','합격'].map(v=>`<button class="chip${st[id]===v?' on':''}" data-act="status" data-id="${id}" data-v="${v}">${v}</button>`).join('')}</div></div>`};
+      h+=['준비중','합격'].map(g=>{const L=ids.filter(id=>st[id]===g);return `<div class="grp"><div class="grp-h"><span class="t">${g}</span><span class="sub">${L.length}건</span></div>${L.length?L.map(row).join(''):`<div class="sub grp-e">${g==='준비중'?'준비 중인 자격증이 없어요':'아직 합격한 자격증이 없어요'}</div>`}</div>`}).join('');
       if(dm)h+=`<div class="delbar"><button class="btn pr" data-act="delsel" ${sel.length?'':'disabled'}>선택 삭제 (${sel.length})</button></div>`}}
   $('#v-my').innerHTML=h}
 
@@ -170,15 +168,17 @@ function save(){const m=S.modal,c=byId(m.id),T=getT().filter(s=>tId(s)!==c.id),n
   T.push(c.id+':'+r);setT(T);const st=getS();if(!st[c.id]){st[c.id]='준비중';setS(st)}}
 let tt;function toast(t){S.toast=t;clearTimeout(tt);tt=setTimeout(()=>{S.toast='';renderModal()},2800)}
 
-function nav(v){const cur=document.querySelector('.view:not([hidden])');if(cur)S.scroll[S.tab]=cur.scrollTop;S.tab=v;
+function nav(v){const cur=document.querySelector('.view:not([hidden])');if(cur)S.scroll[S.tab]=cur.scrollTop;S.tab=v;document.body.dataset.tab=v;
   document.querySelectorAll('.view').forEach(e=>e.hidden=e.id!=='v-'+v);
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v&&(v!=='my'||b.dataset.my===S.my)));
   if(v==='home')renderHome();if(v==='my')renderMy();$('#v-'+v).scrollTop=S.scroll[v]||0}
 
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,d=b.dataset;
   if(b.type!=='radio'&&b.tagName==='INPUT')return;
   switch(a){
-  case'nav':nav(d.v);break;
+  case'nav':if(d.my){S.my=d.my;S.delMode=false;S.delSel=[]}nav(d.v);if(d.focus)setTimeout(()=>$('#q').focus(),60);break;
+  case'hfield':S.hf=d.v;renderHome();break;
+  case'bm':{e.stopPropagation();const c=byId(+d.id),has=getT().some(x=>tId(x)===c.id);if(has)setT(getT().filter(x=>tId(x)!==c.id));else if(nextR(c)){S.modal={id:c.id,roundId:null};save();S.modal=null}else{S.modal={id:c.id,roundId:null};renderModal();break}renderHome();renderMy();break}
   case'quick':S.f.field=d.v;S.f.sub='';S.menu='';if(d.keep==='0')S.q='',$('#q').value='';nav('list');renderList();break;
   case'top':S.anim=S.f.field!==d.v&&!!d.v;S.f.field=d.v;S.f.sub='';S.menu='';renderList();break;
   case'subf':S.f.sub=d.v;S.menu='';renderList();break;
@@ -197,7 +197,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'unsave':{const id=S.modal.id;setT(getT().filter(s=>tId(s)!==id));toast('등록이 취소되었습니다');renderModal();refresh();break}
   case'del':setT(getT().filter(s=>tId(s)!==+d.id));renderMy();renderHome();break;
   case'resetAll':if(confirm('등록된 목표 D-Day를 모두 삭제할까요?')){setT([]);refresh()}break;
-  case'mytab':S.my=d.v;S.delMode=false;S.delSel=[];renderMy();break;
+  case'mytab':S.my=d.v;S.delMode=false;S.delSel=[];renderMy();document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==='my'&&b.dataset.my===S.my));break;
   case'delmode':S.delMode=true;S.delSel=[];renderMy();break;
   case'delcancel':S.delMode=false;S.delSel=[];renderMy();break;
   case'delsel':{const n=S.delSel.length;if(n&&confirm('선택한 '+n+'개 자격증의 취득 상태를 삭제할까요?')){const st=getS();S.delSel.forEach(id=>delete st[id]);setS(st);S.delMode=false;S.delSel=[];toast(n+'개의 취득 상태가 삭제되었습니다');renderMy()}break}

@@ -484,12 +484,12 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline-color:var(--dee
 body,button,input,.dd,.hero .dd,.d3 .dd,.box .dd,.card .dd,.brand,.rk,.t{font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
 
 /* ---- 색 정리: 진한 틸(주색) + 민트(보조)로 대비 확보 ---- */
-:root{--deep:#2E6E5F;--accent:#2E6E5F;--accent-d:#2E6E5F;--dk:#2E6E5F;--on:#FFFFFF;--accent-l:#B7DCD3;--muted:#5E7A73}
+:root{--deep:#1E6B57;--accent:#1E6B57;--accent-d:#1E6B57;--dk:#1E6B57;--on:#FFFFFF;--accent-l:#B7DCD3;--muted:#5E7A73}
 .brand .b2{color:#75AFA0}
-.nav button.on svg{stroke:#2E6E5F}
-.chip:active,.chip.on,.ftab.set,.panel .chip.on,.card .dd,.rk{background:#2E6E5F;border-color:#2E6E5F;color:#fff}
-.btn.pr{background:#2E6E5F;color:#fff;box-shadow:0 6px 16px rgba(46,110,95,.3)}
-.box.hero{background:#2E6E5F;color:#fff;box-shadow:0 14px 30px rgba(46,110,95,.35)}
+.nav button.on svg{stroke:#1E6B57}
+.chip:active,.chip.on,.ftab.set,.panel .chip.on,.card .dd,.rk{background:#1E6B57;border-color:#1E6B57;color:#fff}
+.btn.pr{background:#1E6B57;color:#fff;box-shadow:0 6px 16px rgba(30,107,87,.3)}
+.box.hero{background:#1E6B57;color:#fff;box-shadow:0 14px 30px rgba(30,107,87,.35)}
 .box.hero::before{background:radial-gradient(circle at 35% 35%,#E8F5F1,#B7DCD3 50%,#75AFA0)}
 .hero .t,.hero .dd{color:#fff}
 .hero-ap,.hero-ap.closed,.hero-ap.open,.hero-ap.soon{background:rgba(255,255,255,.2);color:#fff;backdrop-filter:none}
@@ -498,9 +498,9 @@ body,button,input,.dd,.hero .dd,.d3 .dd,.box .dd,.card .dd,.brand,.rk,.t{font-fa
 .hero-info>div{background:rgba(255,255,255,.12);color:#fff}
 .hero-info b,.hero .meta,.hero .sub{color:rgba(255,255,255,.75)}
 .hero-empty .dd{color:rgba(255,255,255,.3)}
-.hero-empty .btn.pr{background:#F7FAFC;color:#2E6E5F;box-shadow:none}
+.hero-empty .btn.pr{background:#F7FAFC;color:#1E6B57;box-shadow:none}
 .schedule-tag.status-open{background:#D3EAE3;color:#245648}
-.d3 .dd,.box .dd{color:#2E6E5F}
+.d3 .dd,.box .dd{color:#1E6B57}
 .hero .dd{color:#fff}
 
 /* 상세 모달: 소개·응시 자격 등 값 텍스트를 왼쪽 정렬 */
@@ -511,3 +511,118 @@ body,button,input,.dd,.hero .dd,.d3 .dd,.box .dd,.card .dd,.brand,.rk,.t{font-fa
 .sr,.sr *{text-align:left}
 .sr>span{flex:1;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
 .bar .btn.ln[data-act="unsave"]{background:var(--fd);border-color:var(--deep);color:var(--dk);font-weight:700}
+
+/* 마이: 취득 상태 그룹(준비중/합격) */
+.grp{margin-top:10px}
+.grp-h{display:flex;align-items:baseline;gap:6px;padding:6px 0 4px;border-bottom:2px solid var(--deep)}
+.grp-h .t{font-size:14px;font-weight:800;color:var(--dk)}
+.grp-e{padding:14px 0;text-align:left}
+
+/* 삭제 버튼 → × */
+.xbtn{flex:0 0 auto;width:30px;height:30px;border-radius:50%;font-size:20px;line-height:1;color:var(--muted);background:var(--fill);display:flex;align-items:center;justify-content:center;padding:0}
+.xbtn:active{background:var(--fd);color:var(--dk)}
+
+/* PC: 창 위아래 빈 공간 없이 화면 높이를 꽉 채움 (너비만 402px로 가운데 정렬) */
+@media (min-width:500px){
+  body{align-items:stretch;background:var(--bg)}
+  .app{height:100vh;height:100dvh;box-shadow:0 0 40px rgba(63,125,110,.12)}
+}
+
+/* 삭제 ×: 원 배경 없이 글자만 */
+.xbtn,.xbtn:active{background:none;border-radius:0;width:28px;font-size:22px;color:var(--muted)}
+.xbtn:active{color:var(--dk)}
+
+/* 마이 · 목표 D-Day 행: 취득 상태처럼 배경 없이, D-Day는 크게 안쪽으로 */
+.my-row{padding:11px 0;border-bottom:1px dashed var(--line)}
+.my-name{flex:1;min-width:0;text-align:left;background:none;border:0;box-shadow:none;padding:0}
+.my-name .t{display:block}
+.my-name .sub{display:block;margin-top:2px}
+.my-dd{flex:0 0 auto;font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--dk);margin:0 14px 0 8px;font-variant-numeric:lining-nums tabular-nums}
+
+/* 홈 · 목표가 2개 이상일 때: 가장 가까운 시험은 큰 카드, 나머지는 '다음 목표' 목록 */
+.next-goals{margin-top:12px}
+.ng-h{display:flex;align-items:baseline;gap:6px;padding:4px 0 4px;border-bottom:2px solid var(--deep)}
+.ng-h .t{font-size:14px;font-weight:800;color:var(--dk)}
+.ng-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:11px 0;border-bottom:1px dashed var(--line);text-align:left;background:none}
+.ng-n{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.ng-row .my-dd{margin:0 4px 0 8px}
+.my-dd.sm{font-size:13px;font-weight:700;letter-spacing:0}
+
+
+/* =====================================================================
+   디자인 2 — 민트 + 퍼플 포인트, 큰 히어로, 썸네일 카드, 4탭 하단바
+   ===================================================================== */
+:root{--bg:#FBFDFC;--paper:#FBFDFC;--desk:#E3F4EE;--fill:#E7F5F0;--fd:#D3EBE3;--deep:#1E6B57;--accent:#1E6B57;--dk:#1E6B57;--accent-l:#BFE6DA;--pu:#8B5CF6;--pu-l:#EDE9FE}
+body[data-tab=home] .top{display:none}
+.top{padding:calc(14px + env(safe-area-inset-top)) 20px 4px}
+.app{background:#FBFDFC}
+.brand .b2{color:var(--pu)}
+.nav{margin:0;border-radius:0;box-shadow:0 -8px 24px rgba(30,107,87,.08);background:#fff;border-top:1px solid #EDF3F0}
+.nav button{min-height:62px;font-size:11px;gap:4px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+@media (min-width:500px){.nav{margin:0}.nav button{padding-bottom:8px}}
+#v-home{padding:0;background:linear-gradient(180deg,#E3F4EE 0,#FBFDFC 330px)}
+.hv{padding:calc(16px + env(safe-area-inset-top)) 20px 8px}
+.hv-top{display:flex;justify-content:space-between;align-items:center}
+.hv-logo{font-size:28px;font-weight:800;letter-spacing:-.04em;color:#1F2430}
+.hv-logo span{color:var(--pu)}
+.hv-ic{display:flex;gap:6px}.hv-ic button{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1F2430}
+.hv-hero{position:relative;display:flex;align-items:center;justify-content:space-between;margin:6px 0 4px;min-height:190px}
+.hv-copy{position:relative;z-index:1}
+.hv-copy h1{font-size:44px;line-height:1.02;font-weight:800;letter-spacing:-.045em;color:#1F2430}
+.hv-copy h1 em{font-style:normal;background:linear-gradient(90deg,#8B5CF6,#A78BFA);-webkit-background-clip:text;background-clip:text;color:transparent;position:relative}
+.hv-copy p{margin-top:12px;font-size:14px;line-height:1.5;color:#4B5563}
+.hv-art{position:absolute;right:-14px;top:-4px;width:210px;height:182px}
+.hv-search{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0 22px;padding:0 16px;height:52px;border-radius:26px;background:#fff;box-shadow:0 6px 22px rgba(30,107,87,.1);color:var(--muted);text-align:left}
+.hv-search .hv-ph{flex:1;font-size:14px}
+.hv-si,.hv-fi{display:flex;color:#6B7280}
+.hv-goal{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;margin-bottom:20px;border-radius:18px;background:var(--deep);color:#fff;text-align:left;box-shadow:0 8px 20px rgba(30,107,87,.28)}
+.hv-gd{font-size:22px;font-weight:800;letter-spacing:-.02em;background:rgba(255,255,255,.16);border-radius:12px;padding:6px 10px}
+.hv-gt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.hv-gt b{font-size:14px;font-weight:700}.hv-gt i{font-style:normal;font-size:11.5px;opacity:.78}
+.hv-ga{display:flex;opacity:.85}
+.hv-sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hv-sh h2{font-size:18px;font-weight:800;letter-spacing:-.03em;color:#1F2430}
+.hv-sh button{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--dk)}
+.hv-chips{display:flex;gap:8px;overflow-x:auto;margin:0 -20px 14px;padding:2px 20px 6px;scrollbar-width:none}
+.hv-chips::-webkit-scrollbar{display:none}
+.hv-chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;height:42px;padding:0 16px;border-radius:21px;background:#EEF1F2;color:#374151;font-size:13.5px;font-weight:600;white-space:nowrap}
+.hv-chip.on{background:#CDEBE1;color:var(--dk)}
+.hv-list{display:flex;flex-direction:column;gap:12px;padding-bottom:84px}
+.hv-card{position:relative;display:flex;gap:14px;align-items:center;padding:12px;border-radius:22px;background:#fff;box-shadow:0 6px 20px rgba(30,107,87,.08);cursor:pointer}
+.th{flex:0 0 88px;width:88px;height:88px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.th svg{width:46px;height:46px}
+.th0{background:linear-gradient(135deg,#E4DEFB,#CFC4F7);color:#6D4FD6}
+.th1{background:linear-gradient(135deg,#D3F0E6,#A9DFCB);color:#1E6B57}
+.th2{background:linear-gradient(135deg,#DFF3E8,#BFE6D4);color:#2E8B6B}
+.hv-body{min-width:0;flex:1}
+.hv-tag{display:inline-block;padding:3px 9px;border-radius:10px;background:var(--pu-l);color:#6D4FD6;font-size:11.5px;font-weight:700}
+.hv-name{margin-top:4px;font-size:17px;font-weight:800;letter-spacing:-.03em;color:#1F2430;padding-right:26px;word-break:keep-all}
+.hv-desc{margin-top:2px;font-size:12px;color:#6B7280}
+.hv-pills{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.hv-pills span{display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:12px;background:#E3F4EE;color:var(--dk);font-size:11.5px;font-weight:600}
+.hv-bm{position:absolute;top:10px;right:10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#1F2430}
+.hv-bm.on{color:var(--pu)}
+.hv-cta{position:sticky;bottom:0;padding:12px 20px 12px;margin-top:-76px;background:linear-gradient(rgba(251,253,252,0),#FBFDFC 40%);pointer-events:none}
+.hv-cta .btn{pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:8px;height:54px;border-radius:27px;font-size:16px;font-weight:700;background:var(--deep);color:#fff;box-shadow:0 10px 24px rgba(30,107,87,.32)}
+.chip.on,.chip:active,.ftab.set,.panel .chip.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.inp{border-radius:26px;height:48px}
+
+
+/* ---- 디자인 2 · 개정: 레퍼런스 2안에 맞춰 더 단순하게 ---- */
+.hv-hero{min-height:210px;margin:14px 0 0}
+.hv-copy h1{font-size:30px;line-height:1.28;font-weight:800;letter-spacing:-.04em}
+.hv-copy h1 em{background:none;-webkit-background-clip:initial;background-clip:initial;color:#7C4DEB;font-style:normal;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px;text-decoration-color:#A78BFA}
+.hv-copy p{margin-top:14px;font-size:14px;color:#6B7280;line-height:1.55}
+.hv-art{width:200px;height:174px;right:-18px;top:34px;opacity:.95}
+.hv-spark{margin:-14px 0 0 2px;vertical-align:top}
+.hv-search{height:48px;margin:6px 0 16px;box-shadow:0 4px 16px rgba(30,107,87,.08);border:1px solid #EEF3F1}
+.hv-chips{margin:0 -20px 18px;padding:2px 20px}
+.hv-chip{height:36px;padding:0 15px;border-radius:18px;background:#fff;border:1px solid #E6ECE9;color:#374151;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(30,107,87,.05)}
+.hv-chip.on{background:var(--deep);border-color:var(--deep);color:#fff}
+.hv-sh h2{font-size:19px}
+.hv-sh button{color:#6B7280;font-weight:500}
+.hv-logo{position:relative}
+.hv-spark{position:absolute;left:100%;top:-6px;margin:0}
+.hv-hero{min-height:200px;overflow:visible}
+.hv-copy h1{font-size:27px}
+.hv-art{width:168px;height:148px;right:-22px;top:64px}
+.hv-spark{width:26px;height:26px;left:calc(100% - 4px);top:-8px}
