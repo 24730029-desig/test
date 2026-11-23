@@ -250,7 +250,7 @@ loadPages().then(()=>{
 
 // 합격 축하: 눌린 위치에서 색종이가 터지고 축하 문구가 잠깐 떠오릅니다.
 function celebrate(x,y){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const app=document.querySelector('.app'),r=app.getBoundingClientRect(),L=document.createElement('div');L.className='cf';
-  const C=['#8DBFC2','#5F9EA2','#F2AFC0'];
+  const C=['#89CFD3','#6FB6BA','#F89494'];
   for(let i=0;i<28;i++){const a=Math.random()*Math.PI*2,v=60+Math.random()*110,e=document.createElement('i');e.style.cssText=`left:${x-r.left}px;top:${y-r.top}px;background:${C[i%C.length]};--dx:${Math.cos(a)*v}px;--dy:${Math.sin(a)*v-70}px;--rot:${Math.random()*720-360}deg;animation-delay:${Math.random()*.08}s`;if(i%3===0)e.style.borderRadius='50%';L.appendChild(e)}
   const m=document.createElement('div');m.className='cf-msg';m.textContent='합격 축하해요! 🎉';L.appendChild(m);app.appendChild(L);setTimeout(()=>L.remove(),2000)}
 // D-Day 카드 터치 리플
