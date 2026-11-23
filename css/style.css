@@ -577,3 +577,23 @@ body,button,input,.dd,.hero .dd,.d3 .dd,.box .dd,.card .dd,.brand,.rk,.t{font-fa
 @media (prefers-reduced-motion:reduce){
   .box.hero::before,.hero-ap.open,.hero-empty .dd,#v-home.go *{animation:none!important}
 }
+
+/* ---- D-Day 카드 모션 2: 임박 강조 · 접수 상태 · 터치 리플 · 합격 축하 ---- */
+@keyframes hv-beat{0%,100%{transform:scale(1)}12%{transform:scale(1.07)}24%{transform:scale(1)}36%{transform:scale(1.05)}60%{transform:scale(1)}}
+@keyframes hv-ring{0%,100%{box-shadow:inset 0 0 0 2px rgba(255,255,255,0),inset 0 0 18px rgba(255,255,255,0)}50%{box-shadow:inset 0 0 0 2px rgba(255,255,255,.85),inset 0 0 26px rgba(255,255,255,.35)}}
+@keyframes hv-hot{0%,100%{box-shadow:0 0 0 0 rgba(255,170,90,.7)}60%{box-shadow:0 0 0 9px rgba(255,170,90,0)}}
+@keyframes rip{from{transform:translate(-50%,-50%) scale(0);opacity:.55}to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+@keyframes cf-fly{0%{transform:translate(0,0) rotate(0);opacity:1}70%{opacity:1}100%{transform:translate(var(--dx),calc(var(--dy) + 150px)) rotate(var(--rot));opacity:0}}
+@keyframes cf-msg{0%{transform:translate(-50%,10px);opacity:0}15%,75%{transform:translate(-50%,0);opacity:1}100%{transform:translate(-50%,-8px);opacity:0}}
+.hero .dd{transform-origin:left center}
+.box.hero.urg .dd{animation:hv-beat 1.8s ease-in-out infinite}
+#v-home.go .hero.urg .dd{animation:hv-pop .6s cubic-bezier(.2,.9,.3,1.2) .12s both,hv-beat 1.8s ease-in-out 1s infinite}
+.box.hero.crit .dd{animation:hv-beat 1.2s ease-in-out infinite}
+#v-home.go .hero.crit .dd{animation:hv-pop .6s cubic-bezier(.2,.9,.3,1.2) .12s both,hv-beat 1.2s ease-in-out 1s infinite}
+.box.hero.crit::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;animation:hv-ring 1.8s ease-in-out infinite}
+.hero-ap.hot{background:rgba(255,176,96,.42);animation:hv-hot 1s ease-out infinite}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);pointer-events:none;transform:translate(-50%,-50%) scale(0);animation:rip .65s ease-out forwards}
+.cf{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:60}
+.cf i{position:absolute;width:8px;height:12px;border-radius:2px;animation:cf-fly 1.3s cubic-bezier(.2,.7,.3,1) forwards}
+.cf-msg{position:absolute;left:50%;top:84px;padding:10px 18px;border-radius:20px;background:#245B4A;color:#fff;font-size:14px;font-weight:700;box-shadow:0 8px 24px rgba(36,91,74,.35);animation:cf-msg 1.9s ease forwards;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.box.hero .dd,.box.hero::after,.hero-ap.hot,.rip,.cf{animation:none!important}}

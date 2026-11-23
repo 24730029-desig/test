@@ -82,9 +82,9 @@ function heroH(s,c,multi){
   const r=c.rounds.find(x=>x.roundId===tR(s))||nextR(c);
   if(!r)return `<button class="box hero" data-act="open" data-id="${c.id}"><div class="hero-top"><span class="sub">${c.name}</span></div><div class="dd">${dLabel(c)}</div></button>`;
   const a0=dd(r.applyStart),a1=dd(r.applyEnd),n=dd(r.examDate);
-  const ap=a1<0?['접수 마감','closed']:a0>0?['접수까지 D-'+a0,'soon']:['접수 중 · 마감 D'+(a1===0?'-DAY':'-'+a1),'open'];
+  const ap=a1<0?['접수 마감','closed']:a0>0?['접수까지 D-'+a0,'soon']:['접수 중 · 마감 D'+(a1===0?'-DAY':'-'+a1),'open'+(a1<=3?' hot':'')];
   const total=Math.max(1,dd(r.examDate)-Math.min(a0,0)),pct=Math.min(100,Math.max(4,Math.round((1-n/Math.max(n+30,30))*100)));
-  return `<button class="box hero" data-act="open" data-id="${c.id}">
+  return `<button class="box hero${n<=1?' crit':n<=7?' urg':''}" data-act="open" data-id="${c.id}">
     <div class="hero-top"><span class="t">${c.name}</span><span class="hero-ap ${ap[1]}">${ap[0]}</span></div>
     <div class="dd">${D(n)}</div>
     <div class="hero-bar"><i style="width:${pct}%"></i></div>
@@ -118,11 +118,15 @@ function renderHome(){
 
   $('#v-home').innerHTML=h;
   const hero=$('#v-home .hero');
-  if(hero&&S.homeAnim){S.homeAnim=false;$('#v-home').classList.remove('go');void $('#v-home').offsetWidth;$('#v-home').classList.add('go');countUp(hero.querySelector('.dd'))}
+  if(hero&&S.homeAnim){S.homeAnim=false;$('#v-home').classList.remove('go');void $('#v-home').offsetWidth;$('#v-home').classList.add('go');countUp(hero.querySelector('.dd'),seenFrom(hero))}
 }
 // 홈 D-Day 숫자: 0에서 목표 값까지 올라가는 카운트업 (모션 줄이기 설정이면 생략)
-function countUp(el){if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const m=/^D-(\d+)$/.exec(el.textContent.trim());if(!m)return;const n=+m[1],t0=performance.now(),dur=Math.min(900,350+n*14);
-  const step=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent='D-'+Math.round(n*e);if(k<1)requestAnimationFrame(step);else el.textContent='D-'+n};requestAnimationFrame(step)}
+// 하루 한 번: 어제 본 D-Day 숫자에서 오늘 숫자로 줄어드는 모션 (처음이면 0에서 올라감)
+function seenFrom(hero){const m=/^D-(\d+)$/.exec(hero.querySelector('.dd').textContent.trim());if(!m)return 0;const n=+m[1],id=hero.dataset.id,day=new Date().toDateString(),seen=lsGet('ddSeen',{}),p=seen[id];
+  if(!p||p.day!==day){seen[id]={n,day};lsSet('ddSeen',seen)}
+  return p&&p.day!==day&&p.n>n?p.n:0}
+function countUp(el,from=0){if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const m=/^D-(\d+)$/.exec(el.textContent.trim());if(!m)return;const n=+m[1],t0=performance.now(),dur=Math.min(900,350+Math.abs(n-from)*14);
+  const step=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent='D-'+Math.round(from+(n-from)*e);if(k<1)requestAnimationFrame(step);else el.textContent='D-'+n};requestAnimationFrame(step)}
 
 function menuH(k,label,opts,fmt){const cur=S.f[k];
   return `<button class="chip${cur?' on':''}" data-act="menu" data-k="${k}" aria-expanded="${S.menu===k}">${label}${cur?': '+fmt(cur):''} ▾</button>`}
@@ -209,7 +213,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'delmode':S.delMode=true;S.delSel=[];renderMy();break;
   case'delcancel':S.delMode=false;S.delSel=[];renderMy();break;
   case'delsel':{const n=S.delSel.length;if(n&&confirm('선택한 '+n+'개 자격증의 취득 상태를 삭제할까요?')){const st=getS();S.delSel.forEach(id=>delete st[id]);setS(st);S.delMode=false;S.delSel=[];toast(n+'개의 취득 상태가 삭제되었습니다');renderMy()}break}
-  case'status':{const st=getS();st[d.id]=d.v;setS(st);renderMy();break}
+  case'status':{const st=getS(),was=st[d.id];st[d.id]=d.v;setS(st);const bx=b.getBoundingClientRect();renderMy();if(d.v==='합격'&&was!=='합격')celebrate(bx.left+bx.width/2,bx.top+bx.height/2);break}
   case'retry':load();break;
   case'demoErr':S.failOnce=true;load();break;
   case'resetData':if(confirm('저장된 목표 D-Day와 취득 상태를 모두 지울까요?')){setT([]);setS({});refresh();renderModal()}break}});
@@ -232,3 +236,11 @@ loadPages().then(()=>{
   nav('home');load();
   window.PassPickSync?.init()
 }).catch(()=>{$('#pages').innerHTML='<section class="view"><div class="box"><div class="t">화면 파일(pages/)을 불러오지 못했습니다</div><p class="sub" style="margin:8px 0">index.html을 더블클릭해서 열면 보안 때문에 pages/ 폴더를 읽을 수 없습니다. project 폴더에서 <b>python3 -m http.server 8000</b> 실행 후 <b>http://localhost:8000</b> 으로 열어 주세요. (GitHub Pages에서는 그대로 동작합니다.)</p></div></section>'});
+
+// 합격 축하: 눌린 위치에서 색종이가 터지고 축하 문구가 잠깐 떠오릅니다.
+function celebrate(x,y){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const app=document.querySelector('.app'),r=app.getBoundingClientRect(),L=document.createElement('div');L.className='cf';
+  const C=['#78CBB5','#245B4A','#F5C451','#F58B6B','#9B8CF2','#DDF2E9'];
+  for(let i=0;i<28;i++){const a=Math.random()*Math.PI*2,v=60+Math.random()*110,e=document.createElement('i');e.style.cssText=`left:${x-r.left}px;top:${y-r.top}px;background:${C[i%C.length]};--dx:${Math.cos(a)*v}px;--dy:${Math.sin(a)*v-70}px;--rot:${Math.random()*720-360}deg;animation-delay:${Math.random()*.08}s`;if(i%3===0)e.style.borderRadius='50%';L.appendChild(e)}
+  const m=document.createElement('div');m.className='cf-msg';m.textContent='합격 축하해요! 🎉';L.appendChild(m);app.appendChild(L);setTimeout(()=>L.remove(),2000)}
+// D-Day 카드 터치 리플
+document.addEventListener('pointerdown',e=>{const h=e.target.closest('.box.hero');if(!h||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const r=h.getBoundingClientRect(),d=Math.max(r.width,r.height)*2.2,s=document.createElement('span');s.className='rip';s.style.cssText=`left:${e.clientX-r.left}px;top:${e.clientY-r.top}px;width:${d}px;height:${d}px`;h.appendChild(s);s.addEventListener('animationend',()=>s.remove())});
