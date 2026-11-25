@@ -924,3 +924,13 @@ body,.app,.view,#v-home,#v-my,#v-list,.sheet,.bar,.top{background:var(--bg)!impo
 .ftab.cmpb{margin-left:auto;display:inline-flex;align-items:center;gap:5px}.ftab.cmpb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .cmpbar{margin:0 0 8px}
 .ftabs{flex-wrap:nowrap;gap:6px}.ftabs .ftab{padding:0 11px;font-size:13px;min-height:38px}.ftab.cmpb{padding:0 10px;flex:0 0 auto}
+
+/* 필터 줄: 선택값이 길어져도 비교 버튼이 밀려나지 않게 */
+.ftabs{align-items:center}
+.ftabs .ftab:not(.cmpb){flex:0 1 auto;min-width:0;display:inline-flex;align-items:center;gap:4px}
+.ftabs .ftab:not(.cmpb) .ft{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ftabs .ftab .ftc{font-style:normal;flex:none}
+.ftabs .ftab:not(.set):not(.cmpb){flex-shrink:0}
+.ftab.cmpb{flex:none!important;margin-left:auto}
+.ftabs .ftab[data-k=diff]{flex:none!important}
+.ftabs .ftab[data-k=field]{flex:1 1 0;max-width:max-content}

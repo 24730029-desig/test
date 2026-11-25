@@ -188,7 +188,7 @@ function renderList(){const el=$('#lb');
   const L=filtered(),anim=S.anim;S.anim=false;
   const hasF=S.f.field||S.f.elig||S.f.diff||S.q;
   const TABS=[['field','분야',()=>S.f.field?S.f.field+(S.f.sub?' › '+S.f.sub:''):''],['elig','응시자격',()=>S.f.elig],['diff','난이도',()=>S.f.diff?dots(+S.f.diff):'']];
-  let h=`<div class="ftabs">${TABS.map(([k,l,v])=>`<button class="ftab${S.f[k]?' set':''}${S.menu===k?' open':''}" data-act="menu" data-k="${k}" aria-expanded="${S.menu===k}">${v()||l} ▾</button>`).join('')}<button class="ftab cmpb${S.cmp.on?' set':''}" data-act="cmpmode" aria-pressed="${S.cmp.on}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16M16 4v16M4 8h8M12 16h8"/></svg>비교</button></div>${S.cmp.on?`<div class="cmpbar"><span class="sub">비교할 자격증 2개를 눌러 주세요 (${S.cmp.ids.length}/2)</span></div>`:''}`;
+  let h=`<div class="ftabs">${TABS.map(([k,l,v])=>`<button class="ftab${S.f[k]?' set':''}${S.menu===k?' open':''}" data-act="menu" data-k="${k}" aria-expanded="${S.menu===k}"><span class="ft">${v()||l}</span><i class="ftc">▾</i></button>`).join('')}<button class="ftab cmpb${S.cmp.on?' set':''}" data-act="cmpmode" aria-pressed="${S.cmp.on}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16M16 4v16M4 8h8M12 16h8"/></svg>비교</button></div>${S.cmp.on?`<div class="cmpbar"><span class="sub">비교할 자격증 2개를 눌러 주세요 (${S.cmp.ids.length}/2)</span></div>`:''}`;
   if(S.menu){const chip=(a,v,on,t)=>`<button class="chip${on?' on':''}" data-act="${a}" data-v="${v}">${t}</button>`;let inner='';
     if(S.menu==='field'){
       inner=`<div class="opts">${['',...FIELDS].map(f=>chip('pick',f,S.f.field===f,f||'전체')).join('')}</div>`;
