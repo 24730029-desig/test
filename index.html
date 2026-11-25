@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F7FAFC">
+<meta name="theme-color" content="#F7FAFA">
 <title>PassPick · 자격증 시험 조건 탐색</title>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="eyebrow">CERTIFICATE PLANNER</div><div class="brand"><span class="b1">Pass</span><span class="b2">Pick</span></div></div>
+  <div class="top"><button id="gear" class="gear" data-act="gear" aria-label="설정" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.7 7.7 0 0 0 0-3l2-1.5-2-3.4-2.4 1a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.6a7.6 7.6 0 0 0-2.6 1.5l-2.4-1-2 3.4 2 1.5a7.7 7.7 0 0 0 0 3l-2 1.5 2 3.4 2.4-1a7.6 7.6 0 0 0 2.6 1.5l.4 2.6h4l.4-2.6a7.6 7.6 0 0 0 2.6-1.5l2.4 1 2-3.4z"/></svg></button><div class="eyebrow">CERTIFICATE PLANNER</div><div class="brand"><span class="b1">Pass</span><span class="b2">Pick</span></div></div>
   <main id="pages"></main> <!-- pages/*.html 화면이 여기에 들어옵니다 -->
   <nav class="nav">
     <button data-act="nav" data-v="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6.5 8 6.5v8a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg><span>홈</span></button>
@@ -18,6 +18,7 @@
     <button data-act="nav" data-v="my"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.8-3.8 3.8-5.8 7.5-5.8s6.7 2 7.5 5.8"/></svg><span>마이</span></button>
   </nav>
   <div id="modal"></div>
+  <div id="settings"></div>
 </div>
 
 <!-- Firebase SDK & 설정 -->

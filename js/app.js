@@ -43,11 +43,39 @@ const tKey=x=>{const d=tDate(x.s,x.c);if(!d)return 9999;const n=dd(d);return n<0
 const nextR=c=>c.rounds.filter(r=>dd(r.examDate)>=0).sort((a,b)=>a.examDate<b.examDate?-1:1)[0];
 const dayOf=c=>{const r=nextR(c);return r?dd(r.examDate):9999};
 const dDayLabel=c=>{const r=nextR(c);return r?D(dd(r.examDate)):''};
-const scheduleLabel=c=>{const t=c.scheduleType||'';if(t==='continuous')return '상시';if(t==='multiple_sessions')return '수시';if(t==='scheduled'||t==='scheduled_periodic')return '정기';if(t==='not_in_next_round')return '일정 발표 전';if(t==='unverified')return '일정 확인 필요';const st=c.researchStatus?.schedule||'';if(st==='상시')return '상시';if(st.startsWith('연중 시험일'))return '수시';if(st==='이번 회차 미시행')return '일정 발표 전';if(st==='정기 일정(5·8·11월 등) 확인')return '정기';if(st==='공식 일정 확인 완료')return '일정 발표 전';return '일정 확인 필요'};
-const dLabel=c=>dDayLabel(c)||scheduleLabel(c);
-const sourceIcon=c=>`<span class="source-icon ${c.dataSource==='A'?'api':''}" title="${c.dataSource==='A'?'API 응답':'JSON 데이터'}" aria-label="${c.dataSource==='A'?'API 응답':'JSON 데이터'}">${c.dataSource==='A'?'A':'J'}</span>`;
-const statusClass=c=>{const v=scheduleLabel(c);return ['상시','수시'].includes(v)?'status-open':v==='정기'?'status-regular':v==='일정 발표 전'?'status-pending':'status-check'};
-const noScheduleText=c=>{const st=c.researchStatus?.schedule||'';if(st==='상시')return '상시시험입니다. 지역·시험장별 개설 일정과 접수 가능 여부를 공식 페이지에서 확인하세요.';if(st==='이번 회차 미시행')return c.scheduleNote||'이번 회차는 시행하지 않습니다. 다음 회차 공지를 확인하세요.';if(st.startsWith('연중 시험일'))return c.scheduleNote||'등급·지역별 시험일을 공식 일정표에서 확인하세요.';return c.scheduleNote||'아직 확인된 시험일이 없습니다. 공식 시행기관의 일정을 확인해 주세요.'};
+const scheduleLabel = c => {
+  const t = c.scheduleType || '';
+  const cat = c.displayScheduleCategory || '';
+  if (t === 'continuous' || t === 'always_open' || t === 'always_open_or_frequent' || cat === 'ALWAYS_OPEN' || cat === 'CONTINUOUS') return '상시';
+  if (t === 'multiple_sessions' || t === 'rolling_submission' || cat === 'MULTIPLE_SESSIONS') return '수시';
+  if (t === 'scheduled' || t === 'scheduled_periodic' || t === 'periodic_scheduled' || t === 'institution_schedule' || cat === 'CONFIRMED_ROUND' || cat === 'PERIODIC_SCHEDULED') return '정기';
+  if (t === 'not_in_next_round' || t === 'round_ended' || cat === 'ROUND_ENDED') return '당해 회차 종료';
+  if (t === 'unverified') return '일정 확인 필요';
+  const st = c.researchStatus?.schedule || '';
+  if (st.startsWith('상시')) return '상시';
+  if (st.startsWith('연중 시험일')) return '수시';
+  if (st.includes('종료') || st === '이번 회차 미시행') return '당해 회차 종료';
+  if (st.startsWith('정기 일정') || st.startsWith('공식 일정')) return '정기';
+  return '일정 확인 필요';
+};
+const dLabel = c => dDayLabel(c) || scheduleLabel(c);
+const sourceIcon = c => `<span class="source-icon ${c.dataSource==='A'?'api':''}" title="${c.dataSource==='A'?'API 응답':'JSON 데이터'}" aria-label="${c.dataSource==='A'?'API 응답':'JSON 데이터'}">${c.dataSource==='A'?'A':'J'}</span>`;
+const statusClass = c => {
+  const v = scheduleLabel(c);
+  return ['상시', '수시'].includes(v) ? 'status-open'
+    : v === '정기' ? 'status-regular'
+    : v === '당해 회차 종료' ? 'status-pending'
+    : 'status-check';
+};
+const noScheduleText = c => {
+  if (c.scheduleNote) return c.scheduleNote;
+  const t = c.scheduleType || '';
+  if (t === 'always_open' || t === 'continuous' || t === 'always_open_or_frequent') return '상시시험입니다. 지역·시험장별 개설 일정과 접수 가능 여부를 공식 페이지에서 확인하세요.';
+  if (t === 'not_in_next_round' || t === 'round_ended') return '당해 연도 정기 회차가 종료되었습니다. 차년도 연간 시험일정 공고 후 공식 페이지에서 확인하세요.';
+  if (t === 'multiple_sessions' || t === 'rolling_submission') return '등급·지역별 시험일을 공식 일정표에서 확인하세요.';
+  if (t === 'scheduled_periodic' || t === 'periodic_scheduled' || t === 'institution_schedule') return '시행기관의 연간·정기 공고에 따라 회차별 일정이 운영됩니다. 공식 일정 페이지에서 확인하세요.';
+  return '아직 확인된 시험일이 없습니다. 공식 시행기관의 일정을 확인해 주세요.';
+};
 
 function load(){S.status='loading';renderList();
   setTimeout(async()=>{
@@ -102,10 +130,10 @@ function heroH(s,c,multi){
 
 function renderHome(){
   const TP=getT().map(s=>({s,c:byId(tId(s))})).filter(x=>x.c).sort((a,b)=>tKey(a)-tKey(b)),T=TP.map(x=>x.c);
-  let h='';
+  let h=`<div class="gr"><div class="gr-t"><h1>안녕하세요!</h1><p>지금, 나에게 맞는<br>자격증을 찾아보세요!</p></div><svg class="gr-art" viewBox="0 0 150 120" aria-hidden="true"><ellipse cx="78" cy="92" rx="62" ry="22" style="fill:var(--ml)"/><path d="M40 62l38-17 38 17-38 17z" style="fill:var(--m)"/><path d="M58 73v14c0 6 40 6 40 0V73l-20 9z" style="fill:var(--md)"/><path d="M110 66v20" style="stroke:var(--m2)" stroke-width="3" stroke-linecap="round"/><circle cx="110" cy="90" r="4" style="fill:var(--m2)"/><rect x="82" y="88" width="46" height="14" rx="7" fill="#fff" style="stroke:var(--ml2)" stroke-width="2"/><path d="M122 88v14" stroke="#F89494" stroke-width="3"/><path d="M126 30l6-9M134 38l9-4M118 24l2-9" style="stroke:var(--m2)" stroke-width="3" stroke-linecap="round"/></svg></div>`;
   
   // 1. 내 목표 D-Day
-  h+=`<div class="sec" style="margin-top:0">`;
+  h+=`<div class="sec" style="margin-top:14px">`;
   if(S.status==='error')h+=`<div class="box sub">자격증 정보를 불러오지 못했습니다. 저장한 목표는 유지됩니다.</div>`;
   else if(S.status==='loading')h+=`<div class="skel"></div>`;
   else if(!T.length)h+=`<div class="box hero hero-empty"><div class="hero-top"><span class="t">나의 목표 D-Day</span><span class="hero-ap">미등록</span></div><div class="dd">D-?</div><div class="hero-bar"><i style="width:0"></i></div><p class="sub" style="margin:12px 0 14px;line-height:1.5">시험일을 등록하면 D-Day와 접수 일정이<br>여기에 한눈에 보여요</p><button class="btn pr" data-act="nav" data-v="list">D-Day 등록하기</button></div>`;
@@ -121,7 +149,7 @@ function renderHome(){
     h+=`<div class="sec"><div class="row sp"><div class="t">원서 접수 임박 시험</div><button class="sub" data-act="quick" data-v="" style="text-decoration:underline">전체보기</button></div><div class="sec-list" style="margin-top:8px">${urgent.map(c=>cardH(c)).join('')}</div></div>`;
 
     const popular=S.certs.slice().sort((a,b)=>popRank(a)-popRank(b)).slice(0,5);
-    h+=`<div class="sec"><div class="t">대학생 인기 자격증 Top 5</div><div class="sec-list" style="margin-top:8px">${popular.map((c,i)=>cardH(c,i+1)).join('')}</div></div>`;
+    h+=`<div class="sec"><div class="t">지금 가장 인기있는 자격증</div><div class="rk-list">${popular.map((c,i)=>`<button class="rk-row" data-act="open" data-id="${c.id}"><span class="rk-n">${i+1}</span><span class="rk-t">${c.name}</span><span class="rkd">${dLabel(c)}</span></button>`).join('')}</div></div>`;
   }
 
   $('#v-home').innerHTML=h;
@@ -177,14 +205,26 @@ function renderMy(){const T=getT().map(s=>({s,c:byId(tId(s))})).filter(x=>x.c).s
 
 function renderModal(){const m=S.modal,el=$('#modal');if(!m){el.innerHTML='';return}
   const c=byId(m.id),T=getT(),reg=T.find(s=>tId(s)===c.id),rs=c.rounds.filter(r=>dd(r.examDate)>=0),rk=reg?tKind(reg):'',rex=reg?tDate(reg,c):null;
-  const sel=m.roundId||(rk==='round'?tR(reg):(rs[0]?.roundId)),r=rs.find(x=>x.roundId===sel)||rs[0],shown=rk&&rk!=='round'?rex:(r?r.examDate:null),showDate=!rs.length||rk==='custom';
-  el.innerHTML=`<div class="ov" data-act="close"></div><div class="sheet" role="dialog" aria-label="${c.name} 상세"><div class="sb"><div class="sh"><span class="t cert-name" style="font-size:17px">${c.name}${sourceIcon(c)}</span><button class="chip" data-act="close">닫기 ✕</button></div>
-  <div class="row sp" style="margin:8px 0"><span class="schedule-tag ${statusClass(c)}">${scheduleLabel(c)}</span>${shown?`<span class="dd">${D(dd(shown))}</span>`:""}</div><div class="sub">회차별 일정 (목표 회차 선택)</div>${rs.length?rs.map((x,i)=>`<label class="rr"><input type="radio" name="rd" value="${x.roundId}" ${x.roundId===r?.roundId&&(!reg||rk==='round')?'checked':''} data-act="round"><span><b>${i+1}회차</b> 접수 ${x.applyStart} ~${x.applyEnd}<br>시험일 ${x.examDate} ·${D(dd(x.examDate))}</span></label>`).join(''):'<div class="box sub">공식 시험 일정이 등록되어 있지 않아요. 공식 시행기관에서 일정을 확인하거나, 아래에서 응시일을 직접 정해 D-Day를 만들 수 있어요.</div>'}
-  ${showDate?`<div class="mydate"><div class="sub">내 시험일 직접 정하기</div><div class="md-row"><input type="date" id="mydate" min="${isoOff(0)}" value="${m.custom||(rk==='custom'?rex:'')}" aria-label="내 시험일"><button class="btn pr" data-act="setdate">${rk==='custom'?'시험일 변경':'D-Day 설정'}</button></div><p class="sub">상시·일정 미확인 시험은 응시 예약일을 입력하면 그날까지 D-Day가 계산돼요.</p></div>`:''}
-  ${c.overview?`<div class="sr" style="margin-top:8px"><b>소개</b><span>${c.overview}</span></div>`:''}<div class="sr" style="margin-top:6px"><b>응시 자격</b><span>${c.eligibilityText}</span></div><div class="sr"><b>응시료</b><span>${won(c.fee)}${c.feeDetails?`<div class="sub">${Object.entries(c.feeDetails).map(([k,v])=>`${k} ${won(v)}`).join(" · ")}</div>`:""}${c.feeBasis?`<div class="sub">${c.feeBasis}</div>`:""}${c.feeSourceUrl?`<div class="sub">출처: <a href="${c.feeSourceUrl}" target="_blank" rel="noopener noreferrer">공식 응시료 안내 ↗</a></div>`:''}</span></div><div class="sr"><b>일정 확인</b><span>${c.researchStatus?.schedule|| (c.rounds?.length?'확인 완료':'미확인')}${c.scheduleSourceUrl?`<div class="sub"><a href="${c.scheduleSourceUrl}" target="_blank" rel="noopener noreferrer">공식 일정 안내 ↗</a></div>`:''}</span></div>${c.tags?.length?`<div class="sr"><b>태그</b><span>${c.tags.join(' · ')}</span></div>`:''}</div>
-  <div class="bar">${S.toast?`<div class="toast"><span>${S.toast}</span><span>${shown?D(dd(shown)):dLabel(c)}</span></div>`:''}
-  <a class="btn ln" href="${c.officialUrl}" target="_blank" rel="noopener noreferrer">공식 접수처 바로가기 ↗</a>
-  ${reg?`<button class="btn ln" data-act="unsave">✓ ${rk==='none'?'목표로 저장됨':'등록 완료'} · 눌러서 취소</button>`:`<button class="btn pr" data-act="save">${rs.length?'목표 D-Day 등록':'목표로 저장 (시험일 미정)'}</button>`}</div></div>`}
+  const sel=m.roundId||(rk==='round'?tR(reg):(rs[0]?.roundId)),r=rs.find(x=>x.roundId===sel)||rs[0],shown=rk&&rk!=='round'?rex:(r?r.examDate:null);
+  const tab=m.tab||'info',ic=(p)=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+  const art=`<svg class="dp-art" viewBox="0 0 220 130" aria-hidden="true"><path d="M20 96c-14-30 10-62 52-66 30-3 40-22 78-14 34 7 56 36 44 66-10 26-40 30-86 30S34 120 20 96z" style="fill:var(--ml)"/><rect x="62" y="22" width="96" height="64" rx="7" fill="#fff" style="stroke:var(--m)" stroke-width="5"/><rect x="70" y="30" width="80" height="48" rx="3" style="fill:var(--ml2)"/><path d="M76 70l18-20 14 14 12-10 20 16z" style="fill:var(--m2)"/><path d="M46 92h128l-10 14H56z" style="fill:var(--m)"/><path d="M175 28l8-10M186 38l12-4M166 18l2-12" style="stroke:var(--m2)" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+  const dots=n=>[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('');
+  let body='';
+  if(tab==='info'){
+    body=`<div class="dc"><div class="dr"><span class="di">${ic('<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M9 3.5v4M15 3.5v4"/>')}</span><div class="dv"><b>시험 일정</b>${rs.length?rs.map(x=>`<label class="rr"><input type="radio" name="rd" value="${x.roundId}" ${x.roundId===r?.roundId&&(!reg||rk==='round')?'checked':''} data-act="round"><span><span class="rt">${x.roundId.replace(/^r/,'')}회차 · 시험일 ${x.examDate} <em>${D(dd(x.examDate))}</em></span><small>접수 ${x.applyStart} ~ ${x.applyEnd}</small></span></label>`).join(''):`<p class="dn">${noScheduleText(c)}</p>`}</div></div>
+    <div class="dr"><span class="di">${ic('<circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5c.5-1.3 1.5-1.8 2.7-1.8 1.5 0 2.5.8 2.5 2 0 2.3-3.2 1.8-3.2 4.3M12 17v.1"/>')}</span><div class="dv"><b>응시료</b><p>${won(c.fee)}</p>${c.feeDetails?`<small>${Object.entries(c.feeDetails).map(([k,v])=>`${k} ${won(v)}`).join(' · ')}</small>`:''}${c.feeBasis?`<small>${c.feeBasis}</small>`:''}</div></div>
+    <div class="dr"><span class="di">${ic('<path d="M5 19V11M12 19V5M19 19v-6"/>')}</span><div class="dv"><b>난이도</b><p class="dots">${dots(c.difficulty||0)}<span>${c.difficulty||'-'} / 3</span></p></div></div></div>`}
+  else if(tab==='elig'){
+    body=`<div class="dc"><b class="dh">응시 자격</b><div class="ck-r"><span class="ckc">${ic('<path d="M6 12.5l4 4 8-9"/>')}</span><span>${c.eligibility}</span></div><p class="dn" style="margin-top:10px">${c.eligibilityText}</p></div>`}
+  else{
+    body=`<div class="dc"><b class="dh">자격증 소개</b><p class="dn">${c.overview||'소개 정보가 아직 없습니다.'}</p><div class="dtags">${(c.tags||[]).map(t=>`<span>${t}</span>`).join('')}</div></div>
+    <div class="dc"><b class="dh">일정 확인</b><p class="dn">${c.scheduleNote||noScheduleText(c)}</p><a class="btn ln" href="${c.officialUrl}" target="_blank" rel="noopener noreferrer">공식 접수처 바로가기 ↗</a></div>`}
+  el.innerHTML=`<div class="dp" role="dialog" aria-label="${c.name} 상세"><div class="dp-top"><button data-act="close" aria-label="뒤로">${ic('<path d="M15 5l-7 7 7 7"/>')}</button></div>
+  <div class="dp-hero">${art}<h2>${c.name}${sourceIcon(c)}</h2><div class="dp-chips"><span class="schedule-tag ${statusClass(c)}">${scheduleLabel(c)}</span><span class="schedule-tag status-check">${c.field}</span><span class="schedule-tag status-check">난이도 ${c.difficulty||'-'}</span>${shown?`<span class="dd">${D(dd(shown))}</span>`:''}</div></div>
+  <div class="dp-tabs">${[['info','시험 정보'],['elig','응시 자격'],['guide','준비 가이드']].map(([k,n])=>`<button class="${tab===k?'on':''}" data-act="dtab" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="dp-body">${body}</div>
+  <div class="dp-cta">${S.toast?`<div class="toast"><span>${S.toast}</span><span>${shown?D(dd(shown)):dLabel(c)}</span></div>`:''}
+  ${reg?`<button class="btn ln" data-act="unsave">✓ ${rk==='none'?'목표로 저장됨':'등록 완료'} · 눌러서 취소</button>`:`<button class="btn pr" data-act="save">${ic('<path d="M7 4.5h10v15l-5-3.5-5 3.5z"/>')}${rs.length?'목표 D-Day 등록':'목표로 저장 (시험일 미정)'}</button>`}</div></div>`}
 
 function refresh(){renderHome();renderMy()}
 function save(){const m=S.modal,c=byId(m.id),T=getT().filter(s=>tId(s)!==c.id),nr=nextR(c);
@@ -192,7 +232,7 @@ function save(){const m=S.modal,c=byId(m.id),T=getT().filter(s=>tId(s)!==c.id),n
   T.push(c.id+':'+key);setT(T);const st=getS();if(!st[c.id]){st[c.id]='준비중';setS(st)}}
 let tt;function toast(t){S.toast=t;clearTimeout(tt);tt=setTimeout(()=>{S.toast='';renderModal()},2800)}
 
-function nav(v){const cur=document.querySelector('.view:not([hidden])');if(cur)S.scroll[S.tab]=cur.scrollTop;S.tab=v;if(v==='home')S.homeAnim=true;
+function nav(v){const cur=document.querySelector('.view:not([hidden])');if(cur)S.scroll[S.tab]=cur.scrollTop;S.tab=v;const g=$('#gear');if(g)g.hidden=v!=='my';if(v==='home')S.homeAnim=true;
   document.querySelectorAll('.view').forEach(e=>e.hidden=e.id!=='v-'+v);
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   if(v==='home')renderHome();if(v==='my')renderMy();$('#v-'+v).scrollTop=S.scroll[v]||0}
@@ -210,9 +250,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'reset':S.f={field:'',sub:'',elig:'',diff:''};S.q='';$('#q').value='';S.menu='';renderList();break;
   case'sort':S.sort=d.v;renderList();break;
   case'open':S.modal={id:+d.id,roundId:null};S.toast='';renderModal();break;
+  case'gear':S.settings=true;renderSettings();break;
+  case'setclose':S.settings=false;renderSettings();break;
+  case'theme':applyTheme(d.v);renderSettings();break;
+  case'dtab':S.modal.tab=d.v;renderModal();break;
   case'close':S.modal=null;S.toast='';renderModal();break;
   case'save':{save();toast(nextR(byId(S.modal.id))?'목표 D-Day로 저장되었습니다':'목표로 저장했어요 · 응시일은 나중에 정할 수 있어요');renderModal();refresh();break}
-  case'setdate':{const v=($('#mydate')||{}).value;if(!v)toast('날짜를 선택해 주세요');else if(dd(v)<0)toast('오늘 이후 날짜를 골라 주세요');else{S.modal.custom=v;save();toast('시험일이 '+v+'로 설정되었습니다')}renderModal();refresh();break}
   case'syncCreate':window.PassPickSync?.createNewCode();break;
   case'syncJoin':{const code=prompt('다른 기기에서 발급받은 6자리 연동 코드를 입력하세요:');if(code)window.PassPickSync?.connectWithCode(code);break}
   case'syncPull':window.PassPickSync?.pull().then(ok=>{if(ok)alert('최신 클라우드 데이터를 불러왔습니다.')});break;
@@ -235,9 +278,16 @@ document.addEventListener('change',e=>{const t=e.target;
   if(e.target.name==='rd'){const m=S.modal,c=byId(m.id);m.roundId=e.target.value;m.custom=null;
   if(getT().some(s=>tId(s)===c.id)){save();toast('목표 회차가 변경되었습니다');refresh()}renderModal()}});
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.modal){S.modal=null;renderModal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.settings){S.settings=false;renderSettings();return}if(e.key==='Escape'&&S.modal){S.modal=null;renderModal()}});
 
 // pages/ 폴더의 화면 HTML을 불러온 뒤 앱을 시작합니다. (home → v-home, search → v-list, my → v-my)
+const THEMES={mint:{n:'민트',d:'지금 쓰는 차분한 민트'},green:{n:'그린',d:'처음 만든 진한 초록'},blue:{n:'블루',d:'코발트 블루 + 차콜'}};
+const getTheme=()=>{try{return localStorage.getItem('theme')}catch(e){return null}};
+function applyTheme(t){if(!THEMES[t])t='mint';document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='green'?'#F7FAFC':t==='blue'?'#F5F7FA':'#F7FAFA'}
+applyTheme(getTheme());
+function renderSettings(){const el=$('#settings');if(!S.settings){el.innerHTML='';return}const cur=document.documentElement.dataset.theme;
+  el.innerHTML=`<div class="dp st" role="dialog" aria-label="설정"><div class="dp-top"><button data-act="setclose" aria-label="뒤로"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button></div>
+  <div class="st-b"><h2>설정</h2><div class="dc"><b class="dh">테마 색상</b>${Object.entries(THEMES).map(([k,v])=>`<button class="th-o ${cur===k?'on':''}" data-act="theme" data-v="${k}"><span class="th-sw th-${k}"><i></i><i></i><i></i></span><span class="th-t"><b>${v.n}</b><small>${v.d}</small></span><span class="th-c">${cur===k?'<svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg>':''}</span></button>`).join('')}</div></div></div>`}
 const PAGES=['home','search','my'];
 async function loadPages(){
   const parts=await Promise.all(PAGES.map(async n=>{const r=await fetch('pages/'+n+'.html');if(!r.ok)throw new Error(n+' '+r.status);return r.text()}));
@@ -250,7 +300,7 @@ loadPages().then(()=>{
 
 // 합격 축하: 눌린 위치에서 색종이가 터지고 축하 문구가 잠깐 떠오릅니다.
 function celebrate(x,y){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const app=document.querySelector('.app'),r=app.getBoundingClientRect(),L=document.createElement('div');L.className='cf';
-  const C=['#78CBB5','#245B4A','#F5C451','#F58B6B','#9B8CF2','#DDF2E9'];
+  const C=['#8DBFC2','#5F9EA2','#F2AFC0'];
   for(let i=0;i<28;i++){const a=Math.random()*Math.PI*2,v=60+Math.random()*110,e=document.createElement('i');e.style.cssText=`left:${x-r.left}px;top:${y-r.top}px;background:${C[i%C.length]};--dx:${Math.cos(a)*v}px;--dy:${Math.sin(a)*v-70}px;--rot:${Math.random()*720-360}deg;animation-delay:${Math.random()*.08}s`;if(i%3===0)e.style.borderRadius='50%';L.appendChild(e)}
   const m=document.createElement('div');m.className='cf-msg';m.textContent='합격 축하해요! 🎉';L.appendChild(m);app.appendChild(L);setTimeout(()=>L.remove(),2000)}
 // D-Day 카드 터치 리플
