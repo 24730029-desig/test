@@ -886,3 +886,37 @@ body,.app,.view,#v-home,#v-my,#v-list,.sheet,.bar,.top{background:var(--bg)!impo
 .ag-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 0;border-top:1px solid var(--line)}
 .ag-t{flex:1;min-width:0}.ag-t b{display:block;font-size:15px;font-weight:800;color:var(--ink)}.ag-t small{display:block;margin:2px 0 0;font-size:12.5px;color:var(--mu);line-height:1.4}
 .dp-d{flex:0 0 auto;padding:4px 11px;border-radius:999px;background:var(--ddbg);color:var(--ddt);font-size:12px;font-weight:800}
+
+/* 직무별 추천: 접고 펼치는 목록 / 준비 가이드 잠금 */
+.pk-acc{background:#fff;border:1px solid var(--line2);border-radius:22px;box-shadow:0 8px 22px color-mix(in srgb,var(--ink) 6%,transparent);overflow:hidden}
+.pk-h{display:flex;align-items:center;gap:10px;width:100%;padding:16px 18px;text-align:left;background:none!important}
+.pk-n{flex:1;min-width:0}.pk-n b{display:block;font-size:16px;font-weight:800;color:var(--ink)}.pk-n small{display:block;margin-top:3px;font-size:13px;color:var(--mu)}
+.pk-cnt{font-size:12.5px;font-weight:800;color:var(--mt);background:var(--ml);padding:3px 10px;border-radius:999px}
+.pk-h .chev{width:22px;height:22px;fill:none;stroke:var(--mu);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.pk-acc.open .chev{transform:rotate(180deg)}
+.pk-b{padding:0 18px 8px}.pk-r{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.pk-r .ag-t{flex:1;min-width:0;text-align:left;background:none!important}
+.pk-add{flex:0 0 auto;height:34px;padding:0 14px;border-radius:999px;background:var(--m)!important;color:#fff;font-size:13px;font-weight:800}
+.pk-add.done{background:var(--ml)!important;color:var(--mt)}
+.dp-tabs button.dis{color:var(--mu);opacity:.7}.lk-i{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:4px;vertical-align:-2px}
+.lockc{text-align:center;padding:30px 18px}.lockc .lk{display:inline-flex;width:54px;height:54px;border-radius:50%;background:var(--ml);color:var(--mt);align-items:center;justify-content:center;margin-bottom:10px}
+.lockc .lk svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.lockc b{display:block;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
+
+.pkg{margin:8px 0 10px;border:1px solid var(--line);border-radius:18px;background:#fff;overflow:hidden}
+.pkg-h{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;text-align:left;background:var(--tag)!important}
+.pkg-h .pk-n b{font-size:14.5px}.pkg-h .chev{width:20px;height:20px;fill:none;stroke:var(--mu);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.pkg.open .chev{transform:rotate(180deg)}.pkg-b{padding:0 14px}.pkg-b>.row:last-child{border-bottom:0!important}
+
+/* 마이: 요약 3칸 + 기기 연동 줄 / 설정 아이콘 흰 원 제거 */
+.gear{background:none!important;box-shadow:none!important}
+.sumcard{display:flex;background:#fff;border:1px solid var(--line2);border-radius:22px;box-shadow:0 8px 22px color-mix(in srgb,var(--ink) 6%,transparent);padding:14px 4px;margin:2px 0 12px}
+.sumcard button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px;background:none!important}
+.sumcard button+button{border-left:1px solid var(--line)}
+.si{display:inline-flex;width:30px;height:30px;color:var(--m);align-items:center;justify-content:center}.si svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.sumcard small{font-size:12px;color:var(--mu)}.sumcard b{font-size:19px;font-weight:800;color:var(--ink)}
+.sync-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;margin-bottom:10px;background:#fff!important;border:1px solid var(--line2);border-radius:18px;text-align:left}
+.sr-t{flex:1;min-width:0}.sr-t b{display:block;font-size:14.5px;font-weight:800;color:var(--ink)}.sr-t small{display:block;margin-top:2px;font-size:12px;color:var(--mu)}
+.sync-row .chev{width:20px;height:20px;fill:none;stroke:var(--mu);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}.sync-row.open .chev{transform:rotate(180deg)}
+
+.sumcard button.on{background:var(--ml)!important;border-radius:16px}.sumcard button.on b{color:var(--mt)}
+.sumcard{gap:2px;padding:8px}.sumcard button+button{border-left:0}

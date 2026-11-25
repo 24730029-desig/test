@@ -199,20 +199,22 @@ function renderList(){const el=$('#lb');
   el.innerHTML=h}
 
 function renderMy(){const T=getT().map(s=>({s,c:byId(tId(s))})).filter(x=>x.c).sort((a,b)=>tKey(a)-tKey(b));
-  let h=window.PassPickSync?window.PassPickSync.renderCardHTML():'';
-  h+=`<div class="tabs"><button class="${S.my==='dday'?'on':''}" data-act="mytab" data-v="dday">목표 D-Day</button><button class="${S.my==='status'?'on':''}" data-act="mytab" data-v="status">취득 상태</button></div>`;
+  const stS=getS(),nGoal=T.length,nPrep=Object.keys(stS).filter(id=>byId(+id)&&stS[id]==='준비중').length,nPass=Object.keys(stS).filter(id=>byId(+id)&&stS[id]==='합격').length;
+  const sb=(v,lab,n,p)=>`<button class="${S.my===v?'on':''}" data-act="mysum" data-v="${v}" aria-pressed="${S.my===v}"><span class="si"><svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg></span><small>${lab}</small><b>${n}개</b></button>`;
+  let h=`<div class="sumcard">${sb('dday','목표 D-Day',nGoal,'<path d="M7 4.5h10v15l-5-3.5-5 3.5z"/>')}${sb('prep','준비중',nPrep,'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>')}${sb('pass','합격',nPass,'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3M12 13v4M8.5 20h7"/>')}</div>`;
+  if(window.PassPickSync){h+=`<button class="sync-row${S.syncOpen?' open':''}" data-act="synctog" aria-expanded="${!!S.syncOpen}"><span class="si"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17a4.5 4.5 0 0 1-.5-8.97A6 6 0 0 1 18 9.5a3.8 3.8 0 0 1-.5 7.5z"/></svg></span><span class="sr-t"><b>기기 연동</b><small>다른 기기와 목표 D-Day · 취득 상태 동기화</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>${S.syncOpen?window.PassPickSync.renderCardHTML():''}`}
   const none=empty('아직 등록된 목표 시험이 없습니다','관심 있는 자격증을 찾아 시험일을 등록해 보세요',`<button class="btn" data-act="nav" data-v="list">자격증 탐색하러 가기</button>`);
   if(S.my==='dday'){
     if(!T.length)h+=none;else{h+=`<div class="row sp"><span class="sub">등록 ${T.length}건</span><button class="sub" data-act="resetAll" style="text-decoration:underline;min-height:34px">전체 초기화</button></div>`;
       h+=T.map(({s,c})=>{const ex=tDate(s,c);return `<div class="row sp my-row"><button class="my-name" data-act="open" data-id="${c.id}"><div class="t">${c.name}</div><div class="sub">${ex?(tKind(s)==='custom'?'내가 정한 시험일 ':'시험일 ')+ex:'시험일 미정 · 눌러서 정하기'}</div></button><span class="my-dd${ex?'':' sm'}">${ex?D(dd(ex)):dLabel(c)}</span><button class="xbtn" data-act="del" data-id="${c.id}" aria-label="${c.name} 삭제">×</button></div>`}).join('')}
-  }else{const st=getS(),ids=Object.keys(st).map(Number).filter(byId),dm=S.delMode&&ids.length>0,sel=S.delSel.filter(id=>ids.includes(id));
+  }else{const st=getS(),GRP=S.my==='pass'?'합격':'준비중',ids=Object.keys(st).map(Number).filter(byId).filter(id=>st[id]===GRP),dm=S.delMode&&ids.length>0,sel=S.delSel.filter(id=>ids.includes(id));
     if(!ids.length)h+=none;else{
       h+=dm?`<div class="row sp" style="margin:2px 0 4px"><label class="row" style="gap:8px;min-height:36px;cursor:pointer"><input type="checkbox" class="ck" data-act="selall" ${sel.length===ids.length?'checked':''}><span class="t" style="font-size:14px">전체 선택</span></label><button class="sub" data-act="delcancel" style="text-decoration:underline;min-height:34px">취소</button></div>`
         :`<div class="row sp" style="margin:2px 0 4px"><span class="sub">총 ${ids.length}건</span><button class="sub" data-act="delmode" style="text-decoration:underline;min-height:34px">삭제</button></div>`;
       const row=id=>{const c=byId(id);return dm
         ?`<label class="row" style="gap:10px;padding:12px 0;border-bottom:1px dashed var(--line);cursor:pointer"><input type="checkbox" class="ck" data-act="selone" data-id="${id}" ${sel.includes(id)?'checked':''}><span class="t" style="flex:1;min-width:0">${c.name}</span></label>`
         :`<div class="row sp" style="padding:11px 0;border-bottom:1px dashed var(--line)"><div style="flex:1;min-width:0"><span class="t">${c.name}</span>${(()=>{const dt=nGet('certDates')[id];return st[id]==='합격'&&dt&&VALID[id]?`<div class="exp">취득 ${dt} · 만료 ${addYears(dt,VALID[id])}</div><div class="exp"><em>재응시까지 ${D(dd(addYears(dt,VALID[id])))}</em></div>`:''})()}</div><div class="chips" style="flex:0 0 auto;flex-wrap:nowrap">${['준비중','합격'].map(v=>`<button class="chip${st[id]===v?' on':''}" data-act="status" data-id="${id}" data-v="${v}">${v}</button>`).join('')}</div></div>`};
-      h+=['준비중','합격'].map(g=>{const L=ids.filter(id=>st[id]===g);return `<div class="grp"><div class="grp-h"><span class="t">${g}</span><span class="sub">${L.length}건</span></div>${L.length?L.map(row).join(''):`<div class="sub grp-e">${g==='준비중'?'준비 중인 자격증이 없어요':'아직 합격한 자격증이 없어요'}</div>`}</div>`}).join('');
+      h+=[GRP].map(g=>{const L=ids.filter(id=>st[id]===g);let gh='',rest=L;if(g==='준비중'){const pa=nGet('pkAdded'),used=new Set();gh=PK.map((p,i)=>{if(!pa[i])return '';const m=p.ids.filter(id=>L.includes(id));if(!m.length)return '';m.forEach(id=>used.add(id));const open=!(S.myPkClosed||[]).includes(i);return `<div class="pkg${open?' open':''}"><button class="pkg-h" data-act="mypk" data-i="${i}" aria-expanded="${open}"><span class="pk-n"><b>${p.n}</b></span><span class="pk-cnt">${m.length}건</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>${open?`<div class="pkg-b">${m.map(row).join('')}</div>`:''}</div>`}).join('');rest=L.filter(id=>!used.has(id))}return `<div class="grp"><div class="grp-h"><span class="t">${g}</span><span class="sub">${L.length}건</span></div>${gh}${L.length?rest.map(row).join(''):`<div class="sub grp-e">${g==='준비중'?'준비 중인 자격증이 없어요':'아직 합격한 자격증이 없어요'}</div>`}</div>`}).join('');
       if(dm)h+=`<div class="delbar"><button class="btn pr" data-act="delsel" ${sel.length?'':'disabled'}>선택 삭제 (${sel.length})</button></div>`}}
   $('#v-my').innerHTML=h}
 
@@ -222,22 +224,24 @@ function renderModal(){const m=S.modal,el=$('#modal');if(!m){el.innerHTML='';ret
   const tab=m.tab||'info',ic=(p)=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
   const art=`<svg class="dp-art" viewBox="0 0 220 130" aria-hidden="true"><path d="M20 96c-14-30 10-62 52-66 30-3 40-22 78-14 34 7 56 36 44 66-10 26-40 30-86 30S34 120 20 96z" style="fill:var(--ml)"/><rect x="62" y="22" width="96" height="64" rx="7" fill="#fff" style="stroke:var(--m)" stroke-width="5"/><rect x="70" y="30" width="80" height="48" rx="3" style="fill:var(--ml2)"/><path d="M76 70l18-20 14 14 12-10 20 16z" style="fill:var(--m2)"/><path d="M46 92h128l-10 14H56z" style="fill:var(--m)"/><path d="M175 28l8-10M186 38l12-4M166 18l2-12" style="stroke:var(--m2)" stroke-width="3.5" stroke-linecap="round"/></svg>`;
   const dots=n=>[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('');
+  const intro=`<div class="dc"><b class="dh">자격증 소개</b><p class="dn">${c.overview||'소개 정보가 아직 없습니다.'}</p><div class="dtags">${(c.tags||[]).map(t=>`<span>${t}</span>`).join('')}</div></div>`,sched=`<div class="dc"><b class="dh">일정 확인</b><p class="dn">${c.scheduleNote||noScheduleText(c)}</p><a class="btn ln" href="${c.officialUrl}" target="_blank" rel="noopener noreferrer">공식 접수처 바로가기 ↗</a></div>`;
   let body='';
   if(tab==='info'){
     body=`<div class="dc"><div class="dr"><span class="di">${ic('<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M9 3.5v4M15 3.5v4"/>')}</span><div class="dv"><b>시험 일정</b>${rs.length?rs.map(x=>`<label class="rr"><input type="radio" name="rd" value="${x.roundId}" ${x.roundId===r?.roundId&&(!reg||rk==='round')?'checked':''} data-act="round"><span><span class="rt">${x.roundId.replace(/^r/,'')}회차 · 시험일 ${x.examDate} <em>${D(dd(x.examDate))}</em></span><small>접수 ${x.applyStart} ~ ${x.applyEnd}</small></span></label>`).join(''):`<p class="dn">${noScheduleText(c)}</p>`}</div></div>
     <div class="dr"><span class="di">${ic('<circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5c.5-1.3 1.5-1.8 2.7-1.8 1.5 0 2.5.8 2.5 2 0 2.3-3.2 1.8-3.2 4.3M12 17v.1"/>')}</span><div class="dv"><b>응시료</b><p>${won(c.fee)}</p>${c.feeDetails?`<small>${Object.entries(c.feeDetails).map(([k,v])=>`${k} ${won(v)}`).join(' · ')}</small>`:''}${c.feeBasis?`<small>${c.feeBasis}</small>`:''}</div></div>
-    <div class="dr"><span class="di">${ic('<path d="M5 19V11M12 19V5M19 19v-6"/>')}</span><div class="dv"><b>난이도</b><p class="dots">${dots(c.difficulty||0)}<span>${c.difficulty||'-'} / 3</span></p></div></div></div>`}
+    <div class="dr"><span class="di">${ic('<path d="M5 19V11M12 19V5M19 19v-6"/>')}</span><div class="dv"><b>난이도</b><p class="dots">${dots(c.difficulty||0)}<span>${c.difficulty||'-'} / 3</span></p></div></div></div>
+    ${intro}`}
   else if(tab==='elig'){
-    body=`<div class="dc"><b class="dh">응시 자격</b><div class="ck-r"><span class="ckc">${ic('<path d="M6 12.5l4 4 8-9"/>')}</span><span>${c.eligibility}</span></div><p class="dn" style="margin-top:10px">${c.eligibilityText}</p></div>`}
+    body=`<div class="dc"><b class="dh">응시 자격</b><div class="ck-r"><span class="ckc">${ic('<path d="M6 12.5l4 4 8-9"/>')}</span><span>${c.eligibility}</span></div><p class="dn" style="margin-top:10px">${c.eligibilityText}</p></div>
+    ${sched}`}
+  else if(!reg){body=`<div class="dc lockc"><span class="lk">${ic('<rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>')}</span><b>목표 D-Day를 등록하면 열려요</b><p class="dn">시험 준비 메모와 체크리스트는 목표로 등록한 자격증에서 쓸 수 있어요.</p></div>`}
   else{
     const nt=nGet('certNotes')[c.id]||{},its=nt.items||[];
     body=`<div class="dc"><b class="dh">시험 준비 메모</b><label class="fl">수험번호<input data-note="no" value="${esc(nt.no)}" placeholder="예: 12345678"></label><label class="fl">시험장<input data-note="place" value="${esc(nt.place)}" placeholder="예: OO대학교 공학관 302호"></label><label class="fl">메모<textarea data-note="memo" rows="3" placeholder="준비물 · 인강 · 오답 메모">${esc(nt.memo)}</textarea></label></div>
-    <div class="dc"><b class="dh">준비 체크리스트 <small>${its.filter(x=>x.d).length}/${its.length}</small></b>${its.map((x,i)=>`<div class="cki ${x.d?'done':''}"><button class="ckb" data-act="cktog" data-i="${i}" aria-label="완료 표시">${x.d?'<svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg>':''}</button><span>${esc(x.t)}</span><button class="ckx" data-act="ckdel" data-i="${i}" aria-label="삭제">×</button></div>`).join('')||'<p class="dn">준비물이나 할 일을 추가해 보세요.</p>'}<div class="ck-add"><input id="ckn" placeholder="예: 기출 3회독" maxlength="40"><button class="btn pr" data-act="ckadd">추가</button></div></div>
-    <div class="dc"><b class="dh">자격증 소개</b><p class="dn">${c.overview||'소개 정보가 아직 없습니다.'}</p><div class="dtags">${(c.tags||[]).map(t=>`<span>${t}</span>`).join('')}</div></div>
-    <div class="dc"><b class="dh">일정 확인</b><p class="dn">${c.scheduleNote||noScheduleText(c)}</p><a class="btn ln" href="${c.officialUrl}" target="_blank" rel="noopener noreferrer">공식 접수처 바로가기 ↗</a></div>`}
+    <div class="dc"><b class="dh">준비 체크리스트 <small>${its.filter(x=>x.d).length}/${its.length}</small></b>${its.map((x,i)=>`<div class="cki ${x.d?'done':''}"><button class="ckb" data-act="cktog" data-i="${i}" aria-label="완료 표시">${x.d?'<svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg>':''}</button><span>${esc(x.t)}</span><button class="ckx" data-act="ckdel" data-i="${i}" aria-label="삭제">×</button></div>`).join('')||'<p class="dn">준비물이나 할 일을 추가해 보세요.</p>'}<div class="ck-add"><input id="ckn" placeholder="예: 기출 3회독" maxlength="40"><button class="btn pr" data-act="ckadd">추가</button></div></div>`}
   el.innerHTML=`<div class="dp" role="dialog" aria-label="${c.name} 상세"><div class="dp-top"><button data-act="close" aria-label="뒤로">${ic('<path d="M15 5l-7 7 7 7"/>')}</button></div>
   <div class="dp-hero">${art}<h2>${c.name}${sourceIcon(c)}</h2><div class="dp-chips"><span class="schedule-tag ${statusClass(c)}">${scheduleLabel(c)}</span><span class="schedule-tag status-check">${c.field}</span><span class="schedule-tag status-check">난이도 ${c.difficulty||'-'}</span>${shown?`<span class="dd">${D(dd(shown))}</span>`:''}</div></div>
-  <div class="dp-tabs">${[['info','시험 정보'],['elig','응시 자격'],['guide','준비 가이드']].map(([k,n])=>`<button class="${tab===k?'on':''}" data-act="dtab" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="dp-tabs">${[['info','시험 정보'],['elig','응시 자격'],['guide','준비 가이드']].map(([k,n])=>`<button class="${tab===k?'on':''}${k==='guide'&&!reg?' dis':''}" data-act="dtab" data-v="${k}">${k==='guide'&&!reg?'<svg class="lk-i" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>':''}${n}</button>`).join('')}</div>
   <div class="dp-body">${body}</div>
   <div class="dp-cta">${S.toast?`<div class="toast"><span>${S.toast}</span><span>${shown?D(dd(shown)):dLabel(c)}</span></div>`:''}
   ${reg?`<button class="btn ln" data-act="unsave">✓ ${rk==='none'?'목표로 저장됨':'등록 완료'} · 눌러서 취소</button>`:`<button class="btn pr" data-act="save">${ic('<path d="M7 4.5h10v15l-5-3.5-5 3.5z"/>')}${rs.length?'목표 D-Day 등록':'목표로 저장 (시험일 미정)'}</button>`}</div></div>`}
@@ -277,13 +281,18 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
   case'theme':applyTheme(d.v);renderSettings();break;
   case'ckadd':{const v=($('#ckn').value||'').trim();if(v){const a=nGet('certNotes'),n=a[S.modal.id]||{};n.items=[...(n.items||[]),{t:v,d:false}];a[S.modal.id]=n;nSet('certNotes',a);renderModal()}break}
   case'cktog':case'ckdel':{const a=nGet('certNotes'),n=a[S.modal.id]||{items:[]},i=+d.i;n.items=n.items||[];if(b.dataset.act==='cktog')n.items[i].d=!n.items[i].d;else n.items.splice(i,1);a[S.modal.id]=n;nSet('certNotes',a);renderModal();break}
+  case'mysum':S.my=d.v;S.delMode=false;S.delSel=[];renderMy();break;
+  case'synctog':S.syncOpen=!S.syncOpen;renderMy();break;
+  case'mypk':{const o=S.myPkClosed||[],i=+d.i;S.myPkClosed=o.includes(i)?o.filter(x=>x!==i):[...o,i];renderMy();break}
+  case'pktog':{const o=S.pkOpen||[],i=+d.i;S.pkOpen=o.includes(i)?o.filter(x=>x!==i):[...o,i];renderRec();break}
+  case'pkone':{const id=+d.id,c=byId(id),T=getT(),st=getS();if(c&&!T.some(x=>tId(x)===id)){const nr=nextR(c);T.push(id+':'+(nr?nr.roundId:'none'));setT(T)}if(!st[id]){st[id]='준비중';setS(st)}refresh();break}
   case'rectab':S.recTab=d.v;renderRec();break;
   case'agepick':S.age=+d.i;renderRec();break;
   case'agadd':{const g=AGES[S.age],T=getT(),st=getS();g.it.forEach(([id])=>{const c=byId(id);if(!c)return;if(!T.some(x=>tId(x)===id)){const nr=nextR(c);T.push(id+':'+(nr?nr.roundId:'none'))}if(!st[id])st[id]='준비중'});setT(T);setS(st);refresh();break}
   case'cmpmode':S.cmp.on=!S.cmp.on;S.cmp.ids=[];renderList();break;
   case'cmpopen':S.sheet={t:'cmp'};renderSheet();break;
   case'sheetclose':S.sheet=null;renderSheet();break;
-  case'pkadd':{const p=PK[+d.i],T=getT(),st=getS();p.ids.forEach(id=>{const c=byId(id);if(!c)return;if(!T.some(x=>tId(x)===id)){const nr=nextR(c);T.push(id+':'+(nr?nr.roundId:'none'))}if(!st[id])st[id]='준비중'});setT(T);setS(st);refresh();break}
+  case'pkadd':{const p=PK[+d.i],T=getT(),st=getS();{const pa=nGet('pkAdded');pa[d.i]=true;nSet('pkAdded',pa)}p.ids.forEach(id=>{const c=byId(id);if(!c)return;if(!T.some(x=>tId(x)===id)){const nr=nextR(c);T.push(id+':'+(nr?nr.roundId:'none'))}if(!st[id])st[id]='준비중'});setT(T);setS(st);refresh();break}
   case'validsave':{const v=($('#vdate')||{}).value;if(v){const a=nGet('certDates');a[S.sheet.id]=v;nSet('certDates',a)}S.sheet=null;renderSheet();renderMy();break}
   case'dtab':S.modal.tab=d.v;renderModal();break;
   case'close':S.modal=null;S.toast='';renderModal();break;
