@@ -937,3 +937,4 @@ body,.app,.view,#v-home,#v-my,#v-list,.sheet,.bar,.top{background:var(--bg)!impo
 /* 분야·응시자격 칸이 너무 작아져 눌리지 않던 문제: 최소 너비 + 같은 비율로 줄어들기 */
 .ftabs .ftab[data-k=field],.ftabs .ftab[data-k=elig]{flex:1 1 0!important;min-width:82px;max-width:max-content}
 .ftabs .ftab[data-k=diff]{min-width:58px}
+.pk>.ag-row:first-child{border-top:0!important;padding-top:4px}
