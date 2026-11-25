@@ -920,3 +920,7 @@ body,.app,.view,#v-home,#v-my,#v-list,.sheet,.bar,.top{background:var(--bg)!impo
 
 .sumcard button.on{background:var(--ml)!important;border-radius:16px}.sumcard button.on b{color:var(--mt)}
 .sumcard{gap:2px;padding:8px}.sumcard button+button{border-left:0}
+
+.ftab.cmpb{margin-left:auto;display:inline-flex;align-items:center;gap:5px}.ftab.cmpb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.cmpbar{margin:0 0 8px}
+.ftabs{flex-wrap:nowrap;gap:6px}.ftabs .ftab{padding:0 11px;font-size:13px;min-height:38px}.ftab.cmpb{padding:0 10px;flex:0 0 auto}
